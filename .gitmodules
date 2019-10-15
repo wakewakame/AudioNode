@@ -1,0 +1,3 @@
+[submodule "3rdparty/HydrangeaJS"]
+	path = 3rdparty/HydrangeaJS
+	url = https://github.com/wakewakame/HydrangeaJS
