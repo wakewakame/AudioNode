@@ -186,7 +186,6 @@ void main(void){
 			}
 			this.audioInput.inputWave = tmpArray;
 			this.resetAndJob();
-			this.page.loop();
 			this.audioOutput.frameBuffer.read(tmpArray)
 			for (let i = 0; i < output.length; i++) {
 				output[i] = tmpArray[i * 4 + 0];
@@ -219,6 +218,7 @@ const OriginalPageEvent = class extends PageEvent {
 	init(page) {
 		this.nodeCanvas = page.addComponent(new NodeCanvasExt(page));
 		let node1 = this.nodeCanvas.add(new ShaderNode("copy", 30 + 250 * 1, 150, 500));
+
 		node1.setCode(
 `precision highp float;
 uniform sampler2D texture;
@@ -231,14 +231,13 @@ void main(void){
 		float(texture_resolution.y) / exp2(ceil(log2(float(texture_resolution.y))))
 	);
 	vec2 p = vUv;
-	p.x = p.x * float(texture_resolution.x - 1) / float(texture_resolution.x);
 	float wave = 0.0;
 	for(int i = 0; i < 128; i++) {
 		vec4 key = texture2D(texture, vec2(float(i) / 127.0, 0.0));
 		float hz = 440.0 * pow(2.0, (float(i) - 69.0) / 12.0);
 		float len = 44100.0;
 		float pi = 3.14159265;
-		if (key.r != 0.0) wave += key.r * sin(hz * 2.0 * pi * 1024.0 * (key.g + p.x) / len);
+		if (key.r != 0.0) wave += 0.3 * key.r * sin(hz * 2.0 * pi * 1024.0 * (key.g + p.x) / len);
 	}
 	gl_FragColor = vec4(wave, 0.0, 0.0, 1.0);
 }`
@@ -251,4 +250,4 @@ void main(void){
 	dropFiles(page, files) { console.log(files); }
 };
 
-const page = new Page(new OriginalPageEvent(), false);
+const page = new Page(new OriginalPageEvent());
