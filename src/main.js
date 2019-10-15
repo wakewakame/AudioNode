@@ -152,7 +152,7 @@ void main(void){
 							this.midiState[e.data[1] * 4 + 2] = 0.0;
 							break;
 						case 144:
-							this.midiState[e.data[1] * 4 + 0] = 1.0;
+							this.midiState[e.data[1] * 4 + 0] = e.data[2] / 127.0;
 							this.midiState[e.data[1] * 4 + 1] = 0.0;
 							break;
 					}
@@ -234,12 +234,11 @@ void main(void){
 	p.x = p.x * float(texture_resolution.x - 1) / float(texture_resolution.x);
 	float wave = 0.0;
 	for(int i = 0; i < 128; i++) {
-		int a = int(texture2D(texture, vec2(float(i) / 127.0, 0.0)).r);
+		vec4 key = texture2D(texture, vec2(float(i) / 127.0, 0.0));
 		float hz = 440.0 * pow(2.0, (float(i) - 69.0) / 12.0);
 		float len = 44100.0;
 		float pi = 3.14159265;
-		float t = texture2D(texture, vec2(float(i) / 127.0, 0.0)).g;
-		if (a == 1) wave += (0.2) * sin(hz * 2.0 * pi * 1024.0 * (t + p.x) / len);
+		if (key.r != 0.0) wave += key.r * sin(hz * 2.0 * pi * 1024.0 * (key.g + p.x) / len);
 	}
 	gl_FragColor = vec4(wave, 0.0, 0.0, 1.0);
 }`
