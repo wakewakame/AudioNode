@@ -128,6 +128,7 @@ void main(void){
 			}
 			setup() {
 				super.setup();
+				this.resize(60.0, 480.0);
 				this.resizeFrame(
 					this.frameBufferState.width, this.frameBufferState.height,
 					this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.FLOAT
@@ -135,14 +136,20 @@ void main(void){
 				this.inputs.remove(this.inputShaderNodeParam);
 				this.inputs.remove(this.inputResolutionNodeParam);
 				this.previewShader.loadShader(this.previewShader.default_shader.vertex, `
-precision highp float;
+precision lowp int;
+precision lowp float;
 uniform sampler2D texture;
-uniform vec2 textureArea;
+uniform ivec2 textureArea;
 varying vec2 vUv;
-varying vec4 vColor;
 
 void main(void){
-	gl_FragColor = vec4(texture2D(texture, vUv * textureArea).rgb, 1.0);
+	int keyIndex = int(vUv.y * 128.0);
+	float key = texture2D(texture, vec2(float(keyIndex) / 128.0, 0.0)).r;
+	vec3 col = vec3(1.0);
+	int tone = int(mod(float(keyIndex), 12.0));
+	if ((vUv.x < 0.5) && ((tone == 1) || (tone == 3) || (tone == 6) || (tone == 8) || (tone == 10))) col = vec3(0.3);
+	if (key > 0.0) col = col * 0.2 + vec3(1.0, 0.5, 0.5) * 0.8;
+	gl_FragColor = vec4(col, 1.0);
 }
 				`);
 				this.midi.addEventListener("onMidiMessage", (e) => {
