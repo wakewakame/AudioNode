@@ -1,5 +1,6 @@
 import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/hydrangea.js";
 import { Midi } from "./midi.js";
+import { AudioBufferNode, AudioInputNode, AudioOutputNode, MidiInputNode } from "./audio_nodes.js";
 
 const Page = HydrangeaJS.GUI.Page.Page;
 const PageEvent = HydrangeaJS.GUI.Page.PageEvent;
@@ -47,140 +48,9 @@ const NodeCanvasExt = class extends NodeCanvas{
 		this.audioOutput = null;
 	}
 	setup(){
-		const AudioInputNode = class extends FrameNode {
-			constructor(x, y, array_length) {
-				super(
-					"audio input",
-					x, y, array_length, 1
-				);
-				this.inputWave = null;
-			}
-			setup() {
-				super.setup();
-				this.resizeFrame(
-					this.frameBufferState.width, this.frameBufferState.height,
-					this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.FLOAT
-				);
-				this.inputs.remove(this.inputShaderNodeParam);
-				this.inputs.remove(this.inputResolutionNodeParam);
-				this.previewShader.loadShader(this.previewShader.default_shader.vertex, `
-precision highp float;
-uniform sampler2D texture;
-uniform ivec2 textureArea;
-varying vec2 vUv;
-
-void main(void){
-	vec2 p = vUv * vec2(textureArea);
-	float wave = texture2D(texture, p).r / 2.0;
-	p.y = (p.y * 2.0) - 1.0;
-	float g = (p.y > wave) ? 1.0 : 0.0;
-	gl_FragColor = vec4(vec3(g), 1.0);
-}
-				`);
-			}
-			job() {
-				super.job();
-				if (this.inputWave instanceof Float32Array) {
-					this.frameBuffer.texture.update(this.inputWave);
-				}
-			}
-		};
-		const AudioOutputNode = class extends FrameNode {
-			constructor(x, y, array_length) {
-				super(
-					"audio output",
-					x, y, array_length, 1
-				);
-			}
-			setup() {
-				super.setup();
-				this.resizeFrame(
-					this.frameBufferState.width, this.frameBufferState.height,
-					this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.FLOAT
-				);
-				this.outputs.remove(this.outputShaderNodeParam);
-				this.outputs.remove(this.outputResolutionNodeParam);
-				this.inputs.remove(this.inputResolutionNodeParam);
-				this.previewShader.loadShader(this.previewShader.default_shader.vertex, `
-precision highp float;
-uniform sampler2D texture;
-uniform ivec2 textureArea;
-varying vec2 vUv;
-
-void main(void){
-	vec2 p = vUv * vec2(textureArea);
-	float wave = texture2D(texture, p).r / 2.0;
-	p.y = (p.y * 2.0) - 1.0;
-	float g = (p.y > wave) ? 1.0 : 0.0;
-	gl_FragColor = vec4(vec3(g), 1.0);
-}
-				`);
-			}
-		};
-		const MidiInputNode = class extends FrameNode {
-			constructor(x, y, midi) {
-				super(
-					"midi input",
-					x, y, 128, 1
-				);
-				this.midi = midi;
-				this.midiState = new Float32Array(128 * 4);
-			}
-			setup() {
-				super.setup();
-				this.resize(60.0, 480.0);
-				this.resizeFrame(
-					this.frameBufferState.width, this.frameBufferState.height,
-					this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.FLOAT
-				);
-				this.inputs.remove(this.inputShaderNodeParam);
-				this.inputs.remove(this.inputResolutionNodeParam);
-				this.previewShader.loadShader(this.previewShader.default_shader.vertex, `
-precision lowp int;
-precision lowp float;
-uniform sampler2D texture;
-uniform ivec2 textureArea;
-varying vec2 vUv;
-
-void main(void){
-	int keyIndex = int(vUv.y * 128.0);
-	float key = texture2D(texture, vec2(float(keyIndex) / 128.0, 0.0)).r;
-	vec3 col = vec3(1.0);
-	int tone = int(mod(float(keyIndex), 12.0));
-	if ((vUv.x < 0.5) && ((tone == 1) || (tone == 3) || (tone == 6) || (tone == 8) || (tone == 10))) col = vec3(0.3);
-	if (key > 0.0) col = col * 0.2 + vec3(1.0, 0.5, 0.5) * 0.8;
-	gl_FragColor = vec4(col, 1.0);
-}
-				`);
-				this.midi.addEventListener("onMidiMessage", (e) => {
-					switch(e.data[0]) {
-						case 128:
-							this.midiState[e.data[1] * 4 + 0] = 0.0;
-							this.midiState[e.data[1] * 4 + 2] = 0.0;
-							break;
-						case 144:
-							this.midiState[e.data[1] * 4 + 0] = e.data[2] / 127.0;
-							this.midiState[e.data[1] * 4 + 1] = 0.0;
-							break;
-					}
-				});
-			}
-			job() {
-				super.job();
-				this.frameBuffer.texture.update(this.midiState);
-				for(let i = 0; i < (this.midiState.length) / 4; i++) {
-					if (this.midiState[i * 4 + 0] == 0.0) {
-						this.midiState[i * 4 + 2] += 1.0;
-					}
-					else {
-						this.midiState[i * 4 + 1] += 1.0;
-					}
-				}
-			}
-		};
 		this.audio = new Audio();
 		this.midi = new Midi();
-		this.audioInput  = this.add(new AudioInputNode (30, 30, this.audio.array_length));
+		this.audioInput = this.add(new AudioInputNode(30, 30, this.audio.array_length));
 		this.audioOutput = this.add(new AudioOutputNode(530, 30, this.audio.array_length));
 		this.midiInput = this.add(new MidiInputNode(30, 230, this.midi));
 		this.audio.setCallback((input, output, inputSampleRate, outputSampleRate) => {
@@ -226,6 +96,9 @@ const OriginalPageEvent = class extends PageEvent {
 		this.nodeCanvas = page.addComponent(new NodeCanvasExt(page));
 		let node1 = this.nodeCanvas.add(new ShaderNode("copy", 30 + 250 * 1, 150, 500));
 
+		this.nodeCanvas.add(new ShaderNode("copy", 30 + 250 * 1, 450, 500));
+		this.nodeCanvas.add(new FrameNode("copy", 30 + 250 * 2, 450, 512, 512));
+
 		node1.setCode(
 `precision highp float;
 uniform sampler2D texture;
@@ -254,7 +127,18 @@ void main(void){
 		node1.inputs.childs[1].output = this.nodeCanvas.audioInput.outputs.childs[1];
 		this.nodeCanvas.audioOutput.inputs.childs[0].output = node1.outputs.childs[0];
 	}
-	dropFiles(page, files) { console.log(files); }
+	dropFiles(page, files) {
+		for(let i = 0; i < files.length; i++) {
+			if (
+				(!this.nodeCanvas) ||
+				(!this.nodeCanvas.audio) ||
+				(!this.nodeCanvas.audio.start)
+			) continue;
+			this.nodeCanvas.audio.loadSound(URL.createObjectURL(files[i]), (e) => {
+				this.nodeCanvas.add(new AudioBufferNode(30, 30, e));
+			}, (e) => console.log(e));
+		}
+	}
 };
 
 const page = new Page(new OriginalPageEvent());
