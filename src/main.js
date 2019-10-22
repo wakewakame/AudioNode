@@ -1,6 +1,7 @@
 import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/hydrangea.js";
 import { Midi } from "./midi.js";
 import { AudioBufferNode, AudioInputNode, AudioOutputNode, MidiInputNode } from "./audio_nodes.js";
+import { CreateEmptyNodeButton } from "./util_nodes.js";
 
 const Page = HydrangeaJS.GUI.Page.Page;
 const PageEvent = HydrangeaJS.GUI.Page.PageEvent;
@@ -96,8 +97,7 @@ const OriginalPageEvent = class extends PageEvent {
 		this.nodeCanvas = page.addComponent(new NodeCanvasExt(page));
 		let node1 = this.nodeCanvas.add(new ShaderNode("copy", 30 + 250 * 1, 150, 500));
 
-		this.nodeCanvas.add(new ShaderNode("copy", 30 + 250 * 1, 450, 500));
-		this.nodeCanvas.add(new FrameNode("copy", 30 + 250 * 2, 450, 512, 512));
+		this.nodeCanvas.add(new CreateEmptyNodeButton(280, 330));
 
 		node1.setCode(
 `precision highp float;
@@ -135,7 +135,7 @@ void main(void){
 				(!this.nodeCanvas.audio.start)
 			) continue;
 			this.nodeCanvas.audio.loadSound(URL.createObjectURL(files[i]), (e) => {
-				this.nodeCanvas.add(new AudioBufferNode(30, 30, e));
+				this.nodeCanvas.add(new AudioBufferNode(files[i].name, 30, 30, e));
 			}, (e) => console.log(e));
 		}
 	}

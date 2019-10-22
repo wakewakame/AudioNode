@@ -4,9 +4,9 @@ const FrameNode = HydrangeaJS.Extra.ShaderNode.FrameNode;
 const ValueNodeParam = HydrangeaJS.Extra.ShaderNode.ValueNodeParam;
 
 export const AudioBufferNode = class extends FrameNode {
-	constructor(x, y, audioBuffer) {
+	constructor(name, x, y, audioBuffer) {
 		super(
-			"audio input",
+			name,
 			x, y, 4096, 4096
 		);
 		this.audioBuffer = audioBuffer;
