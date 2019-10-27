@@ -11,8 +11,19 @@ export const CreateEmptyNodeButton = class extends Node {
 		super("", "", x, y);
 		this.textWidth = 0.0;
 		this.createText = null;
+		this.generateTypes = {};
+		this.generateTypeTexts = [];
+		this.currentGenerateType = 0;
+		this.arrowShape = null;
+		this.mouseArea = 0;
+	}
+	setup() {
+		super.setup();
+		this.createText = this.graphics.createTexture(1, 1);
+		this.createText.loadText("create", "#303030", 100, "monospace", true);
 		this.generateTypes = {
-			"frame": () => { return new FrameNode("empty", this.x, this.y); },
+			"byte frame": () => { return new FrameNode("byte frame", this.x, this.y, 1, 1, this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.UNSIGNED_BYTE); },
+			"float frame": () => { return new FrameNode("float frame", this.x, this.y, 1, 1, this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.FLOAT); },
 			"shader": () => { return new ShaderNode("empty", this.x, this.y, 500); },
 			"float": () => { return new ValueNode("float", "empty", this.x, this.y, 500); },
 			"int": () => { return new ValueNode("int", "empty", this.x, this.y, 500); },
@@ -24,15 +35,6 @@ export const CreateEmptyNodeButton = class extends Node {
 			"ivec4": () => { return new ValueNode("ivec4", "empty", this.x, this.y, 500); },
 			"time": () => { return new TimeNode(this.x, this.y); }
 		};
-		this.generateTypeTexts = [];
-		this.currentGenerateType = 0;
-		this.arrowShape = null;
-		this.mouseArea = 0;
-	}
-	setup() {
-		super.setup();
-		this.createText = this.graphics.createTexture(1, 1);
-		this.createText.loadText("create", "#303030", 100, "monospace", true);
 		this.textWidth = Math.max(this.textWidth, this.createText.width);
 		Object.keys(this.generateTypes).forEach((key) => {
 			const t = this.graphics.createTexture(1, 1);
