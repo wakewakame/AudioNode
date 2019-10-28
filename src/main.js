@@ -180,7 +180,6 @@ void main(void){
 		this.nodeCanvas.audioOutput.inputs.childs[0].output = node1.outputs.childs[0];
 
 		let json = nodesToJson(this.nodeCanvas.childs);
-		jsonToNodes(this.nodeCanvas, json);
 		console.log(json);
 	}
 	dropFiles(page, files) {
