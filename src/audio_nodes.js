@@ -9,6 +9,7 @@ export const AudioBufferNode = class extends FrameNode {
 			name,
 			x, y, 4096, 4096
 		);
+		this.type = "audio frame";
 		this.audioBuffer = audioBuffer;
 		this.audioArray = new Float32Array(4096*4096*4);
 		for(let i = 0; i < this.audioBuffer.numberOfChannels; i++) {
@@ -73,6 +74,7 @@ export const AudioInputNode = class extends FrameNode {
 			"audio input",
 			x, y, array_length, 1
 		);
+		this.type = "audio input frame";
 		this.inputWave = null;
 	}
 	setup() {
@@ -111,6 +113,7 @@ export const AudioOutputNode = class extends FrameNode {
 			"audio output",
 			x, y, array_length, 1
 		);
+		this.type = "audio output frame";
 	}
 	setup() {
 		super.setup();
@@ -143,6 +146,7 @@ export const MidiInputNode = class extends FrameNode {
 			"midi input",
 			x, y, 128, 1
 		);
+		this.type = "midi input frame";
 		this.midi = midi;
 		this.midiState = new Float32Array(128 * 4);
 	}

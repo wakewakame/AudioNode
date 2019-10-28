@@ -13,6 +13,58 @@ const FrameNode = HydrangeaJS.Extra.ShaderNode.FrameNode;
 const ValueNode = HydrangeaJS.Extra.ShaderNode.ValueNode;
 const Audio = HydrangeaJS.Extra.Audio.Audio;
 
+const nodesToJson = (node_array) => {
+	let id_counter = 0;
+	let result = [];
+	let input_params = [];
+	let output_params = [];
+
+	Object.values(node_array).forEach((node) => {
+		let node_json = {};
+		node_json["name"] = node.name;
+		node_json["type"] = node.type;
+		node_json["x"] = node.x;
+		node_json["y"] = node.y;
+		node_json["w"] = node.w;
+		node_json["h"] = node.h;
+		node_json["text"] = "";
+		if (node.hasOwnProperty("compileState")) {
+			node_json["text"] = node.compileState.code;
+		}
+		node_json["inputs"] = [];
+		Object.values(node.inputs.childs).forEach((input) => {
+			let param = {};
+			param["name"] = input.name;
+			param["type"] = input.type;
+			param["output_id"] = "-1";
+			input_params.push({"param": param, "instance": input.output});
+			node_json["inputs"].push(param);
+		});
+		node_json["outputs"] = [];
+		Object.values(node.outputs.childs).forEach((output) => {
+			let param = {};
+			param["name"] = output.name;
+			param["type"] = output.type;
+			param["id"] = id_counter.toString(10);
+			id_counter++;
+			node_json["outputs"].push(param);
+			output_params.push({"param": param, "instance": output});
+		});
+		result.push(node_json);
+	});
+
+	for(let input of input_params) {
+		for(let output of output_params) {
+			if (input["instance"] === output["instance"]) {
+				input["param"]["output_id"] = output["param"]["id"];
+				break;
+			}
+		}
+	}
+
+	return JSON.stringify(result);
+};
+
 const NodeCanvasExt = class extends NodeCanvas{
 	constructor(page) {
 		super();
@@ -126,6 +178,10 @@ void main(void){
 		node1.inputs.childs[0].output = this.nodeCanvas.midiInput.outputs.childs[0];
 		node1.inputs.childs[1].output = this.nodeCanvas.audioInput.outputs.childs[1];
 		this.nodeCanvas.audioOutput.inputs.childs[0].output = node1.outputs.childs[0];
+
+		let json = nodesToJson(this.nodeCanvas.childs);
+		jsonToNodes(this.nodeCanvas, json);
+		console.log(json);
 	}
 	dropFiles(page, files) {
 		for(let i = 0; i < files.length; i++) {

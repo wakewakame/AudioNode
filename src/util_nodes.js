@@ -8,7 +8,7 @@ const TimeNode = HydrangeaJS.Extra.ShaderNode.TimeNode;
 
 export const CreateEmptyNodeButton = class extends Node {
 	constructor(x, y) {
-		super("", "", x, y);
+		super("create", "💪😀💪やぁ", x, y);
 		this.textWidth = 0.0;
 		this.createText = null;
 		this.generateTypes = {};
