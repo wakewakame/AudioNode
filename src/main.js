@@ -147,16 +147,15 @@ const OriginalPageEvent = class extends PageEvent {
 	}
 	init(page) {
 		this.nodeCanvas = page.addComponent(new NodeCanvasExt(page));
+
+		/*
 		let node1 = this.nodeCanvas.add(new ShaderNode("copy", 30 + 250 * 1, 150, 500));
-
 		this.nodeCanvas.add(new CreateEmptyNodeButton(280, 330));
-
 		node1.setCode(
 `precision highp float;
 uniform sampler2D texture;
 uniform ivec2 texture_resolution;
 varying vec2 vUv;
-
 void main(void){
 	vec2 area = vec2(
 		float(texture_resolution.x) / exp2(ceil(log2(float(texture_resolution.x)))),
@@ -174,13 +173,244 @@ void main(void){
 	gl_FragColor = vec4(wave, 0.0, 0.0, 1.0);
 }`
 		);
-
 		node1.inputs.childs[0].output = this.nodeCanvas.midiInput.outputs.childs[0];
 		node1.inputs.childs[1].output = this.nodeCanvas.audioInput.outputs.childs[1];
 		this.nodeCanvas.audioOutput.inputs.childs[0].output = node1.outputs.childs[0];
+*/
+		
+		// delete default nodes
+		this.nodeCanvas.childs.concat().forEach((n) => {this.nodeCanvas.remove(n);});
 
-		let json = nodesToJson(this.nodeCanvas.childs);
-		console.log(json);
+		// add time node
+		const time1 = this.nodeCanvas.add(new TimeNode(20, 20)); time1.resize(0, 0);
+
+		// add frequency characteristic generator
+		const shader1 = this.nodeCanvas.add(new ShaderNode("shader1", 120, 20));
+		shader1.setCode(
+`precision highp float;
+uniform float time;
+varying vec2 vUv;
+
+void main(void){
+    float p = 0.0;
+    if (vUv.x < mod(time * 0.3, 1.0)) p = 0.7;
+	gl_FragColor = vec4(p, 0.0, 0.0, 1.0);
+}`
+		); shader1.resize(0, 0); shader1.inputs.childs[0].output = time1.outputs.childs[0];
+		const size1 = this.nodeCanvas.add(new ValueNode("ivec2", "size1", 120, 170));
+		size1.setCode(
+`{
+	"x": 64.0,
+	"y": 1.0
+}`
+		); size1.resize(0, 0);
+		const frame1 = this.nodeCanvas.add(new FrameNode("frame1", 320, 20, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
+		frame1.inputs.childs[0].output = shader1.outputs.childs[0];
+		frame1.inputs.childs[1].output = size1.outputs.childs[0];
+
+		// add DFT processor 1
+		const shader2 = this.nodeCanvas.add(new ShaderNode("shader2", 620, 20));
+		shader2.setCode(
+`precision highp float;
+uniform sampler2D audio;
+varying vec2 vUv;
+varying vec4 vColor;
+
+float sample_rate = 64.0;
+int samples = int(sample_rate);
+float hz1 = 0.0;
+float hz2 = sample_rate * 0.5;
+
+const float PI = 3.14159265358979;
+
+void main(void){
+	float wave = texture2D(audio, vec2(vUv.y, 0.0)).r;
+	float hz = hz1 * (1.0 - vUv.x) + hz2 * vUv.x;
+	float cos_dft = wave * cos(hz * (vUv.y * float(samples) / float(sample_rate)) * (2.0 * PI));
+	float sin_dft = wave * sin(hz * (vUv.y * float(samples) / float(sample_rate)) * (2.0 * PI));
+	gl_FragColor = vec4(cos_dft, sin_dft, 0.0, 1.0);
+}`
+		); shader2.resize(0, 0); shader2.inputs.childs[0].output = frame1.outputs.childs[0];
+		const size2 = this.nodeCanvas.add(new ValueNode("ivec2", "size2", 620, 170));
+		size2.setCode(
+`{
+	"x": 64.0,
+	"y": 64.0
+}`
+		); size2.resize(0, 0);
+		const frame2 = this.nodeCanvas.add(new FrameNode("frame2", 820, 20, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
+		frame2.inputs.childs[0].output = shader2.outputs.childs[0];
+		frame2.inputs.childs[1].output = size2.outputs.childs[0];
+
+		// add DFT processor 2
+		const shader3 = this.nodeCanvas.add(new ShaderNode("shader3", 1120, 20));
+		shader3.setCode(
+`precision highp float;
+uniform sampler2D texture;
+varying vec2 vUv;
+
+float len = 64.0;
+
+void main(void){
+    vec2 sum = vec2(0.0);
+    for(int i = 0; i < 1024; i++) {
+        vec2 p = vec2(vUv.x, (float(i) + 0.5) / len);
+        sum += texture2D(texture, p).rg;
+    }
+    sum /= len * 2.0;
+	gl_FragColor = vec4(sum, 0.0, 1.0);
+}`
+		); shader3.resize(0, 0); shader3.inputs.childs[0].output = frame2.outputs.childs[0];
+		const size3 = this.nodeCanvas.add(new ValueNode("ivec2", "size3", 1120, 170));
+		size3.setCode(
+`{
+	"x": 64.0,
+	"y": 1.0
+}`
+		); size3.resize(0, 0);
+		const frame3 = this.nodeCanvas.add(new FrameNode("frame3", 1320, 20, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
+		frame3.inputs.childs[0].output = shader3.outputs.childs[0];
+		frame3.inputs.childs[1].output = size3.outputs.childs[0];
+
+		// add IDFT processor 1
+		const shader4 = this.nodeCanvas.add(new ShaderNode("shader4", 1620, 20));
+		shader4.setCode(
+`precision highp float;
+uniform sampler2D audio;
+varying vec2 vUv;
+varying vec4 vColor;
+
+float sample_rate = 64.0;
+int samples = int(sample_rate);
+float hz1 = 0.0;
+float hz2 = sample_rate * 0.5;
+
+const float PI = 3.14159265358979;
+
+void main(void){
+	vec2 wave = texture2D(audio, vec2(vUv.y, 0.0)).rg;
+	float hz = hz1 * (1.0 - vUv.x) + hz2 * vUv.x;
+	float cos_dft = wave.r * cos(hz * (vUv.y * float(samples) / float(sample_rate)) * (2.0 * PI));
+	float sin_dft = wave.g * sin(hz * (vUv.y * float(samples) / float(sample_rate)) * (2.0 * PI));
+	gl_FragColor = vec4(cos_dft, sin_dft, 0.0, 1.0);
+}`
+		); shader4.resize(0, 0); shader4.inputs.childs[0].output = frame3.outputs.childs[0];
+		const size4 = this.nodeCanvas.add(new ValueNode("ivec2", "size4", 1620, 170));
+		size4.setCode(
+`{
+	"x": 64.0,
+	"y": 64.0
+}`
+		); size4.resize(0, 0);
+		const frame4 = this.nodeCanvas.add(new FrameNode("frame4", 1820, 20, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
+		frame4.inputs.childs[0].output = shader4.outputs.childs[0];
+		frame4.inputs.childs[1].output = size4.outputs.childs[0];
+
+		// add IDFT processor 2
+		const shader5 = this.nodeCanvas.add(new ShaderNode("shader5", 2120, 20));
+		shader5.setCode(
+`precision highp float;
+uniform sampler2D texture;
+varying vec2 vUv;
+
+float len = 64.0;
+
+void main(void){
+    vec2 sum = vec2(0.0);
+    for(int i = 0; i < 1024; i++) {
+        vec2 p = vec2(vUv.x, (float(i) + 0.5) / len);
+        sum += texture2D(texture, p).rg;
+    }
+    sum /= len * 2.0;
+	gl_FragColor = vec4(sum, 0.0, 1.0);
+}`
+		); shader5.resize(0, 0); shader5.inputs.childs[0].output = frame4.outputs.childs[0];
+		const size5 = this.nodeCanvas.add(new ValueNode("ivec2", "size5", 2120, 170));
+		size5.setCode(
+`{
+	"x": 64.0,
+	"y": 1.0
+}`
+		); size5.resize(0, 0);
+		const frame5 = this.nodeCanvas.add(new FrameNode("frame5", 2320, 20, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
+		frame5.inputs.childs[0].output = shader5.outputs.childs[0];
+		frame5.inputs.childs[1].output = size5.outputs.childs[0];
+
+		// add preview 1
+		const shader6 = this.nodeCanvas.add(new ShaderNode("shader6", 620, 320));
+		shader6.setCode(
+`precision highp float;
+uniform sampler2D texture;
+varying vec2 vUv;
+
+void main(void){
+    vec2 cs = texture2D(texture, vUv).rg;
+    float wave = sqrt(cs.x * cs.x + cs.y * cs.y);
+    float g = (vUv.y > wave) ? 1.0 : 0.0;
+	gl_FragColor = vec4(vec3(g), 1.0);
+}`
+		); shader6.resize(0, 0); shader6.inputs.childs[0].output = frame1.outputs.childs[0];
+		const size6 = this.nodeCanvas.add(new ValueNode("ivec2", "size6", 620, 490));
+		size6.setCode(
+`{
+	"x": 64.0,
+	"y": 64.0
+}`
+		); size6.resize(0, 0);
+		const frame6 = this.nodeCanvas.add(new FrameNode("frame6", 820, 320, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
+		frame6.inputs.childs[0].output = shader6.outputs.childs[0];
+		frame6.inputs.childs[1].output = size6.outputs.childs[0];
+
+		// add preview 2
+		const shader7 = this.nodeCanvas.add(new ShaderNode("shader7", 1620, 320));
+		shader7.setCode(
+`precision highp float;
+uniform sampler2D texture;
+varying vec2 vUv;
+
+void main(void){
+    vec2 cs = texture2D(texture, vUv).rg;
+    float wave = sqrt(cs.x * cs.x + cs.y * cs.y);
+    float g = (vUv.y > wave) ? 1.0 : 0.0;
+	gl_FragColor = vec4(vec3(g), 1.0);
+}`
+		); shader7.resize(0, 0); shader7.inputs.childs[0].output = frame3.outputs.childs[0];
+		const size7 = this.nodeCanvas.add(new ValueNode("ivec2", "size7", 1620, 490));
+		size7.setCode(
+`{
+	"x": 64.0,
+	"y": 64.0
+}`
+		); size7.resize(0, 0);
+		const frame7 = this.nodeCanvas.add(new FrameNode("frame7", 1820, 320, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
+		frame7.inputs.childs[0].output = shader7.outputs.childs[0];
+		frame7.inputs.childs[1].output = size7.outputs.childs[0];
+
+		// add preview 3
+		const shader8 = this.nodeCanvas.add(new ShaderNode("shader8", 2620, 320));
+		shader8.setCode(
+`precision highp float;
+uniform sampler2D texture;
+varying vec2 vUv;
+
+void main(void){
+    vec2 cs = texture2D(texture, vUv).rg;
+    float wave = sqrt(cs.x * cs.x + cs.y * cs.y);
+    float g = (vUv.y > wave) ? 1.0 : 0.0;
+	gl_FragColor = vec4(vec3(g), 1.0);
+}`
+		); shader8.resize(0, 0); shader8.inputs.childs[0].output = frame5.outputs.childs[0];
+		const size8 = this.nodeCanvas.add(new ValueNode("ivec2", "size8", 2620, 490));
+		size8.setCode(
+`{
+	"x": 64.0,
+	"y": 64.0
+}`
+		); size8.resize(0, 0);
+		const frame8 = this.nodeCanvas.add(new FrameNode("frame8", 2820, 320, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
+		frame8.inputs.childs[0].output = shader8.outputs.childs[0];
+		frame8.inputs.childs[1].output = size8.outputs.childs[0];
+
 	}
 	dropFiles(page, files) {
 		for(let i = 0; i < files.length; i++) {

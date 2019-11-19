@@ -1,0 +1,129 @@
+Nodeの派生クラス一覧
+	./src/*
+		CreateEmptyNodeButton(x, y) : Node
+		AudioBufferNode(name, x, y, audioBuffer) : FrameNode
+		AudioInputNode(x, y, array_length) : FrameNode
+		AudioOutputNode(x, y, array_length) : FrameNode
+		MidiInputNode(x, y, midi) : FrameNode
+	./3rdparty/HydrangeaJS/src/*
+		TimeNode(x, y) : Node
+		PictureNode(name, img_url, x, y) : FrameNode
+		ShaderNode(name, x, y, compileLatency = -1) : Node
+		ValueNode(type, name, x, y, compileLatency = -1) : Node
+		FrameNode(name, x, y, width = 1, height = 1, format = null, type = null) : Node
+
+変更後
+	すべてのNodeの派生クラスはtoJson()とloadJson()を実装するようにする。
+	json読み込み時にはコンストラクタ引数は何も指定しない状態でインスタンスを生成する。
+	そのため、各クラスのコンストラクタは、すべての引数がundefinedであった場合にも正常に処理を行うように改善する。
+	その後、toJson()で生成されたjsonがloadJson()で呼ばれる。
+	その他の必要な設定は各自のインスタンスが外部にパラメータを要求するように変更する。
+	また、FrameNodeはUnsignedByteとFloatの2つ用意する。
+
+実用性を主張するために必要なサンプル。
+・フーリエ変換
+・逆フーリエ変換
+・FIRフィルタ
+
+[
+	{
+		"name":"audio input",
+		"type":"audio input frame",
+		"x":30,
+		"y":30,
+		"w":140,
+		"h":24,
+		"text":"",
+		"inputs":[],
+		"outputs":[
+			{
+				"name":"output",
+				"type":"frame",
+				"id":"0"
+			},
+			{
+				"name":"output",
+				"type":"ivec2",
+				"id":"1"
+			}
+		]
+	},
+	{
+		"name":"audio output",
+		"type":"audio output frame",
+		"x":530,
+		"y":30,
+		"w":140,
+		"h":24,
+		"text":"",
+		"inputs":[
+			{
+				"name":"input",
+				"type":"shader",
+				"output_id":"4"
+			}
+		],
+		"outputs":[]
+	},
+	{
+		"name":"midi input",
+		"type":"midi input frame",
+		"x":30,
+		"y":230,
+		"w":140,
+		"h":24,
+		"text":"",
+		"inputs":[],
+		"outputs":[
+			{
+				"name":"output",
+				"type":"frame",
+				"id":"2"
+			},
+			{
+				"name":"output",
+				"type":"ivec2",
+				"id":"3"
+			}
+		]
+	},
+	{
+		"name":"copy",
+		"type":"shader",
+		"x":280,
+		"y":150,
+		"w":140,
+		"h":24,
+		"text":"precision highp float;\nuniform sampler2D texture;\nuniform ivec2 texture_resolution;\nvarying vec2 vUv;\n\nvoid main(void){\n\tvec2 area = vec2(\n\t\tfloat(texture_resolution.x) / exp2(ceil(log2(float(texture_resolution.x)))),\n\t\tfloat(texture_resolution.y) / exp2(ceil(log2(float(texture_resolution.y))))\n\t);\n\tvec2 p = vUv;\n\tfloat wave = 0.0;\n\tfor(int i = 0; i < 128; i++) {\n\t\tvec4 key = texture2D(texture, vec2(float(i) / 127.0, 0.0));\n\t\tfloat hz = 440.0 * pow(2.0, (float(i) - 69.0) / 12.0);\n\t\tfloat len = 44100.0;\n\t\tfloat pi = 3.14159265;\n\t\tif (key.r != 0.0) wave += 0.3 * key.r * sin(hz * 2.0 * pi * 1024.0 * (key.g + p.x) / len);\n\t}\n\tgl_FragColor = vec4(wave,0.0,0.0,1.0);\n}",
+		"inputs":[
+			{
+				"name":"texture",
+				"type":"frame",
+				"output_id":"2"
+			},
+			{
+				"name":"texture_resolution",
+				"type":"ivec2",
+				"output_id":"1"
+			}
+		],
+		"outputs":[
+			{
+				"name":"output",
+				"type":"shader",
+				"id":"4"
+			}
+		]
+	},
+	{
+		"name":"💪😀💪やぁ",
+		"type":"create",
+		"x":280,
+		"y":330,
+		"w":140,
+		"h":24,
+		"text":"",
+		"inputs":[],
+		"outputs":[]
+	}
+]
