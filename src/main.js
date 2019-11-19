@@ -2,6 +2,7 @@ import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/hydrangea.js";
 import { Midi } from "./midi.js";
 import { AudioBufferNode, AudioInputNode, AudioOutputNode, MidiInputNode } from "./audio_nodes.js";
 import { CreateEmptyNodeButton } from "./util_nodes.js";
+import { LatencyFrameNode } from "./util_nodes.js";
 
 const Page = HydrangeaJS.GUI.Page.Page;
 const PageEvent = HydrangeaJS.GUI.Page.PageEvent;
@@ -181,6 +182,12 @@ void main(void){
 		// delete default nodes
 		this.nodeCanvas.childs.concat().forEach((n) => {this.nodeCanvas.remove(n);});
 
+		// add CreateEmptyNodeButton
+		this.nodeCanvas.add(new CreateEmptyNodeButton(280, 330));
+
+		// set fir length
+		const w_length = "1024.0";
+
 		// add time node
 		const time1 = this.nodeCanvas.add(new TimeNode(20, 20)); time1.resize(0, 0);
 
@@ -200,7 +207,7 @@ void main(void){
 		const size1 = this.nodeCanvas.add(new ValueNode("ivec2", "size1", 120, 170));
 		size1.setCode(
 `{
-	"x": 64.0,
+	"x": `+w_length+`,
 	"y": 1.0
 }`
 		); size1.resize(0, 0);
@@ -216,7 +223,7 @@ uniform sampler2D audio;
 varying vec2 vUv;
 varying vec4 vColor;
 
-float sample_rate = 64.0;
+float sample_rate = `+w_length+`;
 int samples = int(sample_rate);
 float hz1 = 0.0;
 float hz2 = sample_rate * 0.5;
@@ -234,8 +241,8 @@ void main(void){
 		const size2 = this.nodeCanvas.add(new ValueNode("ivec2", "size2", 620, 170));
 		size2.setCode(
 `{
-	"x": 64.0,
-	"y": 64.0
+	"x": `+w_length+`,
+	"y": `+w_length+`
 }`
 		); size2.resize(0, 0);
 		const frame2 = this.nodeCanvas.add(new FrameNode("frame2", 820, 20, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
@@ -249,7 +256,7 @@ void main(void){
 uniform sampler2D texture;
 varying vec2 vUv;
 
-float len = 64.0;
+float len = `+w_length+`;
 
 void main(void){
     vec2 sum = vec2(0.0);
@@ -257,14 +264,14 @@ void main(void){
         vec2 p = vec2(vUv.x, (float(i) + 0.5) / len);
         sum += texture2D(texture, p).rg;
     }
-    sum /= len * 2.0;
+    sum /= len;
 	gl_FragColor = vec4(sum, 0.0, 1.0);
 }`
 		); shader3.resize(0, 0); shader3.inputs.childs[0].output = frame2.outputs.childs[0];
 		const size3 = this.nodeCanvas.add(new ValueNode("ivec2", "size3", 1120, 170));
 		size3.setCode(
 `{
-	"x": 64.0,
+	"x": `+w_length+`,
 	"y": 1.0
 }`
 		); size3.resize(0, 0);
@@ -280,7 +287,7 @@ uniform sampler2D audio;
 varying vec2 vUv;
 varying vec4 vColor;
 
-float sample_rate = 64.0;
+float sample_rate = `+w_length+`;
 int samples = int(sample_rate);
 float hz1 = 0.0;
 float hz2 = sample_rate * 0.5;
@@ -298,8 +305,8 @@ void main(void){
 		const size4 = this.nodeCanvas.add(new ValueNode("ivec2", "size4", 1620, 170));
 		size4.setCode(
 `{
-	"x": 64.0,
-	"y": 64.0
+	"x": `+w_length+`,
+	"y": `+w_length+`
 }`
 		); size4.resize(0, 0);
 		const frame4 = this.nodeCanvas.add(new FrameNode("frame4", 1820, 20, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
@@ -313,7 +320,7 @@ void main(void){
 uniform sampler2D texture;
 varying vec2 vUv;
 
-float len = 64.0;
+float len = `+w_length+`;
 
 void main(void){
     vec2 sum = vec2(0.0);
@@ -321,14 +328,13 @@ void main(void){
         vec2 p = vec2(vUv.x, (float(i) + 0.5) / len);
         sum += texture2D(texture, p).rg;
     }
-    sum /= len * 2.0;
 	gl_FragColor = vec4(sum, 0.0, 1.0);
 }`
 		); shader5.resize(0, 0); shader5.inputs.childs[0].output = frame4.outputs.childs[0];
 		const size5 = this.nodeCanvas.add(new ValueNode("ivec2", "size5", 2120, 170));
 		size5.setCode(
 `{
-	"x": 64.0,
+	"x": `+w_length+`,
 	"y": 1.0
 }`
 		); size5.resize(0, 0);
@@ -353,8 +359,8 @@ void main(void){
 		const size6 = this.nodeCanvas.add(new ValueNode("ivec2", "size6", 620, 490));
 		size6.setCode(
 `{
-	"x": 64.0,
-	"y": 64.0
+	"x": `+w_length+`,
+	"y": `+w_length+`
 }`
 		); size6.resize(0, 0);
 		const frame6 = this.nodeCanvas.add(new FrameNode("frame6", 820, 320, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
@@ -378,8 +384,8 @@ void main(void){
 		const size7 = this.nodeCanvas.add(new ValueNode("ivec2", "size7", 1620, 490));
 		size7.setCode(
 `{
-	"x": 64.0,
-	"y": 64.0
+	"x": `+w_length+`,
+	"y": `+w_length+`
 }`
 		); size7.resize(0, 0);
 		const frame7 = this.nodeCanvas.add(new FrameNode("frame7", 1820, 320, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
@@ -395,7 +401,7 @@ varying vec2 vUv;
 
 void main(void){
     vec2 cs = texture2D(texture, vUv).rg;
-    float wave = sqrt(cs.x * cs.x + cs.y * cs.y);
+    float wave = cs.x + cs.y;
     float g = (vUv.y > wave) ? 1.0 : 0.0;
 	gl_FragColor = vec4(vec3(g), 1.0);
 }`
@@ -403,14 +409,17 @@ void main(void){
 		const size8 = this.nodeCanvas.add(new ValueNode("ivec2", "size8", 2620, 490));
 		size8.setCode(
 `{
-	"x": 64.0,
-	"y": 64.0
+	"x": `+w_length+`,
+	"y": `+w_length+`
 }`
 		); size8.resize(0, 0);
 		const frame8 = this.nodeCanvas.add(new FrameNode("frame8", 2820, 320, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
 		frame8.inputs.childs[0].output = shader8.outputs.childs[0];
 		frame8.inputs.childs[1].output = size8.outputs.childs[0];
 
+		// add LatencyFrameNode
+		const l_frame1 = this.nodeCanvas.add(new LatencyFrameNode("l_frame1", 20, 320, 1, 1, this.nodeCanvas.graphics.gapp.gl.RGBA, this.nodeCanvas.graphics.gapp.gl.FLOAT));
+	
 	}
 	dropFiles(page, files) {
 		for(let i = 0; i < files.length; i++) {

@@ -158,41 +158,12 @@ export const LatencyFrameNode = class extends FrameNode {
 		);
 	}
 	job(){
+		let tmp = this.frameBuffer;
+		this.frameBuffer = this.frameBufferTmp;
+		this.frameBufferTmp = tmp;
 		super.job();
-		if (this.inputResolutionNodeParam.output !== null) {
-			this.resizeFrame(
-				this.inputResolutionNodeParam.output.value.x,
-				this.inputResolutionNodeParam.output.value.y
-			);
-		}
-		this.outputShaderNodeParam.value.texture = this.frameBuffer.texture;
-		this.outputResolutionNodeParam.value.x = this.frameBuffer.texture.width;
-		this.outputResolutionNodeParam.value.y = this.frameBuffer.texture.height;
-		if (this.inputShaderNodeParam.output === null) return;
-		let shader = this.inputShaderNodeParam.output.value.shader;
-		if (shader === null) return;
-		this.frameBuffer.beginDraw();
-		const isEnableBlend = this.frameBuffer.gl.isEnabled(this.frameBuffer.gl.DITHER);
-		this.frameBuffer.gl.disable(this.frameBuffer.gl.BLEND);
-		this.graphics.clear();
-		let tmp_current_shader = this.graphics.current_shader;
-		this.graphics.shader(shader);
-		this.graphics.rect(0, this.frameBuffer.height, this.frameBuffer.width, -this.frameBuffer.height);
-		this.graphics.shader(tmp_current_shader);
-		this.frameBuffer.endDraw();
-		if (isEnableBlend) this.frameBuffer.gl.enable(this.frameBuffer.gl.BLEND);
 	}
 	draw(){
 		super.draw();
-		let tmp_current_shader = this.graphics.current_shader;
-		this.graphics.shader(this.previewShader);
-		this.previewShader.set("texture", this.frameBuffer.texture);
-		this.previewShader.set(
-			"textureArea",
-			this.frameBuffer.texture.width  / this.frameBuffer.texture.pow2_width,
-			this.frameBuffer.texture.height / this.frameBuffer.texture.pow2_height
-		);
-		this.graphics.shape(this.inner_shape);
-		this.graphics.shader(tmp_current_shader);
 	}
 };
