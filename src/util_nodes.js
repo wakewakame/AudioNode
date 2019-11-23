@@ -162,6 +162,7 @@ export const LatencyFrameNode = class extends FrameNode {
 		this.frameBuffer = this.frameBufferTmp;
 		this.frameBufferTmp = tmp;
 		super.job();
+		this.outputShaderNodeParam.value.texture = this.frameBufferTmp.texture
 	}
 	draw(){
 		super.draw();
