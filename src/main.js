@@ -180,13 +180,13 @@ void main(void){
 */
 		
 		// delete default nodes
-		this.nodeCanvas.childs.concat().forEach((n) => {this.nodeCanvas.remove(n);});
+		//this.nodeCanvas.childs.concat().forEach((n) => {this.nodeCanvas.remove(n);});
 
 		// add CreateEmptyNodeButton
 		this.nodeCanvas.add(new CreateEmptyNodeButton(280, 330));
 
 		// set fir length
-		const w_length = "1024.0";
+		const w_length = "128.0";
 
 		// add time node
 		const time1 = this.nodeCanvas.add(new TimeNode(20, 20)); time1.resize(0, 0);
@@ -223,19 +223,22 @@ uniform sampler2D audio;
 varying vec2 vUv;
 varying vec4 vColor;
 
-float sample_rate = `+w_length+`;
+const float sample_rate = `+w_length+`;
 int samples = int(sample_rate);
 float hz1 = 0.0;
 float hz2 = sample_rate * 0.5;
 
 const float PI = 3.14159265358979;
 
+vec2 iexp(float theta) {
+    return vec2(cos(theta), sin(theta));
+}
+
 void main(void){
 	float wave = texture2D(audio, vec2(vUv.y, 0.0)).r;
 	float hz = hz1 * (1.0 - vUv.x) + hz2 * vUv.x;
-	float cos_dft = wave * cos(hz * (vUv.y * float(samples) / float(sample_rate)) * (2.0 * PI));
-	float sin_dft = wave * sin(hz * (vUv.y * float(samples) / float(sample_rate)) * (2.0 * PI));
-	gl_FragColor = vec4(cos_dft, sin_dft, 0.0, 1.0);
+	vec2 dft = wave * iexp(0.0 - hz * (vUv.y * float(samples) / float(sample_rate)) * (2.0 * PI));
+	gl_FragColor = vec4(dft, 0.0, 1.0);
 }`
 		); shader2.resize(0, 0); shader2.inputs.childs[0].output = frame1.outputs.childs[0];
 		const size2 = this.nodeCanvas.add(new ValueNode("ivec2", "size2", 620, 170));
@@ -256,11 +259,11 @@ void main(void){
 uniform sampler2D texture;
 varying vec2 vUv;
 
-float len = `+w_length+`;
+const float len = `+w_length+`;
 
 void main(void){
     vec2 sum = vec2(0.0);
-    for(int i = 0; i < 1024; i++) {
+    for(int i = 0; i < int(len); i++) {
         vec2 p = vec2(vUv.x, (float(i) + 0.5) / len);
         sum += texture2D(texture, p).rg;
     }
@@ -287,19 +290,29 @@ uniform sampler2D audio;
 varying vec2 vUv;
 varying vec4 vColor;
 
-float sample_rate = `+w_length+`;
+const float sample_rate = `+w_length+`;
 int samples = int(sample_rate);
 float hz1 = 0.0;
 float hz2 = sample_rate * 0.5;
 
 const float PI = 3.14159265358979;
 
+vec2 iexp(float theta) {
+    return vec2(cos(theta), sin(theta));
+}
+
+vec2 compNumMult(vec2 a, vec2 b) {
+    return vec2(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
+}
+
 void main(void){
 	vec2 wave = texture2D(audio, vec2(vUv.y, 0.0)).rg;
 	float hz = hz1 * (1.0 - vUv.x) + hz2 * vUv.x;
-	float cos_dft = wave.r * cos(hz * (vUv.y * float(samples) / float(sample_rate)) * (2.0 * PI));
-	float sin_dft = wave.g * sin(hz * (vUv.y * float(samples) / float(sample_rate)) * (2.0 * PI));
-	gl_FragColor = vec4(cos_dft, sin_dft, 0.0, 1.0);
+	vec2 idft = compNumMult(
+	    wave,
+	    iexp(hz * (vUv.y * float(samples) / float(sample_rate)) * (2.0 * PI))
+	);
+	gl_FragColor = vec4(idft, 0.0, 1.0);
 }`
 		); shader4.resize(0, 0); shader4.inputs.childs[0].output = frame3.outputs.childs[0];
 		const size4 = this.nodeCanvas.add(new ValueNode("ivec2", "size4", 1620, 170));
@@ -320,11 +333,11 @@ void main(void){
 uniform sampler2D texture;
 varying vec2 vUv;
 
-float len = `+w_length+`;
+const float len = `+w_length+`;
 
 void main(void){
     vec2 sum = vec2(0.0);
-    for(int i = 0; i < 1024; i++) {
+    for(int i = 0; i < int(len); i++) {
         vec2 p = vec2(vUv.x, (float(i) + 0.5) / len);
         sum += texture2D(texture, p).rg;
     }
@@ -401,7 +414,7 @@ varying vec2 vUv;
 
 void main(void){
     vec2 cs = texture2D(texture, vUv).rg;
-    float wave = cs.x + cs.y;
+    float wave = cs.x;
     float g = (vUv.y > wave) ? 1.0 : 0.0;
 	gl_FragColor = vec4(vec3(g), 1.0);
 }`
