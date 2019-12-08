@@ -186,7 +186,7 @@ void main(void){
 		this.nodeCanvas.add(new CreateEmptyNodeButton(280, 330));
 
 		// set fir length
-		const w_length = "128.0";
+		const w_length = "1024.0";
 
 		// add time node
 		const time1 = this.nodeCanvas.add(new TimeNode(20, 20)); time1.resize(0, 0);
