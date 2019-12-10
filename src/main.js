@@ -492,8 +492,8 @@ void main(void){
 		float hz = 440.0 * pow(2.0, (float(i) - 69.0) / 12.0);
 		float len = 44100.0;
 		float pi = 3.14159265;
-		if (key.r != 0.0) {
-			wave += read(p.x + key.g);
+		if (i == 0) {
+			wave += read(p.x + key.b);
 			//wave += 0.1 * key.r * sin(hz * 2.0 * pi * 1024.0 * (key.g + p.x) / len);
 		}
 	}
