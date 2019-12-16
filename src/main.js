@@ -121,9 +121,11 @@ const NodeCanvasExt = class extends NodeCanvas{
 			}
 			this.audioInput.inputWave = tmpArray;
 			this.resetAndJob();
-			this.audioOutput.frameBuffer.read(tmpArray)
-			for (let i = 0; i < output.length; i++) {
-				output[i] = tmpArray[i * 4 + 0];
+			if (this.audioOutput.frameBuffer.isDeleted() === false) {
+				this.audioOutput.frameBuffer.read(tmpArray)
+				for (let i = 0; i < output.length; i++) {
+					output[i] = tmpArray[i * 4 + 0];
+				}
 			}
 		});
 		document.addEventListener("click", () => {
@@ -152,34 +154,8 @@ const OriginalPageEvent = class extends PageEvent {
 	}
 	init(page) {
 		this.nodeCanvas = page.addComponent(new NodeCanvasExt(page));
-
-		let node1 = this.nodeCanvas.add(new ShaderNode("copy", 30 + 250 * 1, 150, 500));
+		this.nodeCanvas.childs.concat().forEach((node) => {this.nodeCanvas.remove(node)});
 		this.nodeCanvas.add(new CreateEmptyNodeButton(280, 330));
-		node1.setCode(
-`precision highp float;
-uniform sampler2D texture;
-uniform ivec2 texture_resolution;
-varying vec2 vUv;
-void main(void){
-	vec2 area = vec2(
-		float(texture_resolution.x) / exp2(ceil(log2(float(texture_resolution.x)))),
-		float(texture_resolution.y) / exp2(ceil(log2(float(texture_resolution.y))))
-	);
-	vec2 p = vUv;
-	float wave = 0.0;
-	for(int i = 0; i < 128; i++) {
-		vec4 key = texture2D(texture, vec2(float(i) / 127.0, 0.0));
-		float hz = 440.0 * pow(2.0, (float(i) - 69.0) / 12.0);
-		float len = 44100.0;
-		float pi = 3.14159265;
-		if (key.r != 0.0) wave += 0.3 * key.r * sin(hz * 2.0 * pi * 1024.0 * (key.g + p.x) / len);
-	}
-	gl_FragColor = vec4(wave, 0.0, 0.0, 1.0);
-}`
-		);
-		node1.inputs.childs[0].output = this.nodeCanvas.midiInput.outputs.childs[0];
-		node1.inputs.childs[1].output = this.nodeCanvas.audioInput.outputs.childs[1];
-		this.nodeCanvas.audioOutput.inputs.childs[0].output = node1.outputs.childs[0];
 	}
 	dropFiles(page, files) {
 		for(let i = 0; i < files.length; i++) {
