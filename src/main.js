@@ -154,7 +154,7 @@ const OriginalPageEvent = class extends PageEvent {
 	}
 	init(page) {
 		this.nodeCanvas = page.addComponent(new NodeCanvasExt(page));
-		this.nodeCanvas.childs.concat().forEach((node) => {this.nodeCanvas.remove(node)});
+		this.nodeCanvas.childs.concat().filter(x => !(x instanceof AudioInputNode)).forEach((node) => {this.nodeCanvas.remove(node)});
 		this.nodeCanvas.add(new CreateEmptyNodeButton(280, 330));
 	}
 	dropFiles(page, files) {
