@@ -1,16 +1,18 @@
 import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/hydrangea.js";
 
-const Node = HydrangeaJS.GUI.Templates.Node;
+const ConvertibleNode = HydrangeaJS.GUI.Templates.ConvertibleNode;
 const FrameNode = HydrangeaJS.Extra.ShaderNode.FrameNode;
 const ValueNodeParam = HydrangeaJS.Extra.ShaderNode.ValueNodeParam;
 
 export const AudioBufferNode = class extends FrameNode {
 	constructor(name, x, y, audioBuffer) {
-		super(
-			name,
-			x, y, 4096, 4096
-		);
+		super();
 		this.type = "audio frame";
+		this.name = name;
+		this.x = x;
+		this.y = y;
+		this.json["custom"].frameBufferState.width = 4096;
+		this.json["custom"].frameBufferState.height = 4096;
 		this.audioBuffer = audioBuffer;
 		this.audioArray = new Float32Array(4096*4096*4);
 		for(let i = 0; i < this.audioBuffer.numberOfChannels; i++) {
@@ -70,18 +72,19 @@ void main(void){
 	}
 };
 export const AudioInputNode = class extends FrameNode {
-	constructor(x, y, array_length) {
-		super(
-			"audio input",
-			x, y, array_length, 1
-		);
+	constructor(x = 0, y = 0, array_length = 0) {
+		super();
 		this.type = "audio input frame";
+		this.name = "audio input";
+		this.x = x;
+		this.y = y;
+		this.json["custom"].array_length = array_length;
 		this.inputWave = null;
 	}
 	setup() {
 		super.setup();
 		this.resizeFrame(
-			this.frameBufferState.width, this.frameBufferState.height,
+			this.json["custom"].array_length, 1,
 			this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.FLOAT
 		);
 		this.inputs.remove(this.inputShaderNodeParam);
@@ -108,9 +111,13 @@ void main(void){
 		}
 	}
 };
-export const AudioOutputNode = class extends Node {
-	constructor(x, y) {
-		super("audio output frame", "audio output", x, y);
+export const AudioOutputNode = class extends ConvertibleNode {
+	constructor(x = 0, y = 0) {
+		super();
+		this.type = "audio output frame";
+		this.name = "audio output";
+		this.x = x;
+		this.y = y;
 		this.inputFrameNodeParam = null;
 		this.previewShader = null;
 		this.emptyTexture = null;
@@ -177,11 +184,11 @@ void main(void){
 };
 export const MidiInputNode = class extends FrameNode {
 	constructor(x, y, midi) {
-		super(
-			"midi input",
-			x, y, 128, 1
-		);
+		super();
 		this.type = "midi input frame";
+		this.name = "midi input";
+		this.x = x;
+		this.y = y;
 		this.midi = midi;
 		this.midiState = new Float32Array(128 * 4);
 	}
@@ -189,7 +196,7 @@ export const MidiInputNode = class extends FrameNode {
 		super.setup();
 		this.resize(60.0, 480.0);
 		this.resizeFrame(
-			this.frameBufferState.width, this.frameBufferState.height,
+			128, 1,
 			this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.FLOAT
 		);
 		this.inputs.remove(this.inputShaderNodeParam);

@@ -5,69 +5,35 @@ import { CreateEmptyNodeButton } from "./util_nodes.js";
 
 const Page = HydrangeaJS.GUI.Page.Page;
 const PageEvent = HydrangeaJS.GUI.Page.PageEvent;
-const NodeCanvas = HydrangeaJS.GUI.Templates.NodeCanvas;
+const ConvertibleNodeCanvas = HydrangeaJS.GUI.Templates.ConvertibleNodeCanvas;
+const ConvertibleNode = HydrangeaJS.GUI.Templates.ConvertibleNode;
 const TimeNode = HydrangeaJS.Extra.ShaderNode.TimeNode;
 const PictureNode = HydrangeaJS.Extra.ShaderNode.PictureNode;
-const ShaderAndFrameNode = HydrangeaJS.Extra.ShaderNode.ShaderAndFrameNode;
+const ShaderNode = HydrangeaJS.Extra.ShaderNode.ShaderNode;
 const FrameNode = HydrangeaJS.Extra.ShaderNode.FrameNode;
+const ShaderAndFrameNode = HydrangeaJS.Extra.ShaderNode.ShaderAndFrameNode;
 const ValueNode = HydrangeaJS.Extra.ShaderNode.ValueNode;
+const ValueNodeParam = HydrangeaJS.Extra.ShaderNode.ValueNodeParam;
 const Audio = HydrangeaJS.Extra.Audio.Audio;
 
-const nodesToJson = (node_array) => {
-	let id_counter = 0;
-	let result = [];
-	let input_params = [];
-	let output_params = [];
-
-	Object.values(node_array).forEach((node) => {
-		let node_json = {};
-		node_json["name"] = node.name;
-		node_json["type"] = node.type;
-		node_json["x"] = node.x;
-		node_json["y"] = node.y;
-		node_json["w"] = node.w;
-		node_json["h"] = node.h;
-		node_json["text"] = "";
-		if (node.hasOwnProperty("compileState")) {
-			node_json["text"] = node.compileState.code;
-		}
-		node_json["inputs"] = [];
-		Object.values(node.inputs.childs).forEach((input) => {
-			let param = {};
-			param["name"] = input.name;
-			param["type"] = input.type;
-			param["output_id"] = "-1";
-			input_params.push({"param": param, "instance": input.output});
-			node_json["inputs"].push(param);
-		});
-		node_json["outputs"] = [];
-		Object.values(node.outputs.childs).forEach((output) => {
-			let param = {};
-			param["name"] = output.name;
-			param["type"] = output.type;
-			param["id"] = id_counter.toString(10);
-			id_counter++;
-			node_json["outputs"].push(param);
-			output_params.push({"param": param, "instance": output});
-		});
-		result.push(node_json);
-	});
-
-	for(let input of input_params) {
-		for(let output of output_params) {
-			if (input["instance"] === output["instance"]) {
-				input["param"]["output_id"] = output["param"]["id"];
-				break;
-			}
-		}
-	}
-
-	return JSON.stringify(result);
-};
-
-const NodeCanvasExt = class extends NodeCanvas{
+const NodeCanvasExt = class extends ConvertibleNodeCanvas{
 	constructor(page) {
-		super();
+		super({
+			"empty": ConvertibleNode,
+			"frame": FrameNode,
+			"image": PictureNode,
+			"shader": ShaderNode,
+			"filter": ShaderAndFrameNode,
+			"time": TimeNode,
+			"int": ValueNode,
+			"float": ValueNode,
+			"ivec2": ValueNode,
+			"vec2": ValueNode,
+			"ivec3": ValueNode,
+			"vec3": ValueNode,
+			"ivec4": ValueNode,
+			"vec4": ValueNode
+		});
 		this.page = page;
 		this.activeNode = null;
 		this.editorElement = this.page.addElement("div", 0.0, 0.5, 1.0, 1.0, {
@@ -83,12 +49,12 @@ const NodeCanvasExt = class extends NodeCanvas{
 		this.editor.getSession().setMode("ace/mode/glsl");
 		this.editor.on("change", (e) => {
 			if (this.childs.length > 0) {
-				if (this.childs[0].hasOwnProperty("compileState")) {
+				if (this.childs[0].json["custom"].hasOwnProperty("compileState")) {
 					const code = this.editor.getValue();
 					if (
 						code !== "" &&
-						code !== this.childs[0].compileState.code
-					) this.childs[0].setCode(code);
+						code !== this.childs[0].json["custom"].compileState.code
+					) this.childs[0].json["custom"].setCode(code);
 				}
 			}
 		});
@@ -130,9 +96,9 @@ const NodeCanvasExt = class extends NodeCanvas{
 		component.addEventListener("DOWN", e => {
 			this.activeNode = e.component;
 			this.editorElement.style["display"] = "none";
-			if (this.childs[0].hasOwnProperty("compileState")) {
+			if (this.childs[0].json["custom"].hasOwnProperty("compileState")) {
 				this.editorElement.style["display"] = "inline";
-				this.editor.setValue(this.activeNode.compileState.code);
+				this.editor.setValue(this.activeNode.json["custom"].compileState.code);
 				this.editor.gotoLine(1, 0);
 			}
 		});
@@ -194,9 +160,6 @@ const OriginalPageEvent = class extends PageEvent {
 
 		node1.setInput(this.nodeCanvas.midiInput, "output frame", "input_frame");
 		this.nodeCanvas.audioOutput.setInput(node1, "output frame", "input frame");
-
-		let json = nodesToJson(this.nodeCanvas.childs);
-		console.log(json);
 	}
 	dropFiles(page, files) {
 		for(let i = 0; i < files.length; i++) {

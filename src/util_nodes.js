@@ -1,14 +1,18 @@
 import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/hydrangea.js";
 
-const Node = HydrangeaJS.GUI.Templates.Node;
+const ConvertibleNode = HydrangeaJS.GUI.Templates.ConvertibleNode;
 const ShaderAndFrameNode = HydrangeaJS.Extra.ShaderNode.ShaderAndFrameNode;
 const FrameNode = HydrangeaJS.Extra.ShaderNode.FrameNode;
 const ValueNode = HydrangeaJS.Extra.ShaderNode.ValueNode;
 const TimeNode = HydrangeaJS.Extra.ShaderNode.TimeNode;
 
-export const CreateEmptyNodeButton = class extends Node {
-	constructor(x, y) {
-		super("create", "💪😀💪やぁ", x, y);
+export const CreateEmptyNodeButton = class extends ConvertibleNode {
+	constructor(x = 0, y = 0) {
+		super();
+		this.type = "create";
+		this.name = "💪😀💪やぁ";
+		this.x = x;
+		this.y = y;
 		this.textWidth = 0.0;
 		this.createText = null;
 		this.generateTypes = {};
