@@ -35,7 +35,7 @@ precision highp float;
 uniform sampler2D texture;
 uniform ivec2 textureArea;
 uniform int audioLength;
-varying vec2 vUv;
+varying vec2 v_uv;
 
 float read(float f_index){
 	float index = floor(f_index * 1024.0);
@@ -52,7 +52,7 @@ float read(float f_index){
 }
 
 void main(void){
-	vec2 p = vUv;
+	vec2 p = v_uv;
 	float wave = read(p.x * float(audioLength) / 1024.0);
 	
 	p.y = (p.y * 2.0) - 1.0;
@@ -89,10 +89,10 @@ export const AudioInputNode = class extends FrameNode {
 precision highp float;
 uniform sampler2D texture;
 uniform ivec2 textureArea;
-varying vec2 vUv;
+varying vec2 v_uv;
 
 void main(void){
-	vec2 p = vUv * vec2(textureArea);
+	vec2 p = v_uv * vec2(textureArea);
 	float wave = texture2D(texture, p).r / 2.0;
 	p.y = (p.y * 2.0) - 1.0;
 	float g = (p.y > wave) ? 1.0 : 0.0;
@@ -128,10 +128,10 @@ export const AudioOutputNode = class extends FrameNode {
 precision highp float;
 uniform sampler2D texture;
 uniform ivec2 textureArea;
-varying vec2 vUv;
+varying vec2 v_uv;
 
 void main(void){
-	vec2 p = vUv * vec2(textureArea);
+	vec2 p = v_uv * vec2(textureArea);
 	float wave = texture2D(texture, p).r / 2.0;
 	p.y = (p.y * 2.0) - 1.0;
 	float g = (p.y > wave) ? 1.0 : 0.0;
@@ -164,7 +164,7 @@ precision lowp int;
 precision mediump float;
 uniform sampler2D texture;
 uniform ivec2 textureArea;
-varying vec2 vUv;
+varying vec2 v_uv;
 
 int getKeyType(vec2 pos) {
 	if (pos.y < 0.0 || 1.0 < pos.y || pos.x < 0.0) return -1;
@@ -194,7 +194,7 @@ int getKeyIndex(vec2 pos) {
 }
 
 void main( void ) {
-	vec2 p = vec2(vUv.y, 1.0 - vUv.x);
+	vec2 p = vec2(v_uv.y, 1.0 - v_uv.x);
 	p.x *= 128.0 / 12.0;
 
 	int keyType = getKeyType(p);

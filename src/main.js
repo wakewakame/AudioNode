@@ -155,14 +155,14 @@ const OriginalPageEvent = class extends PageEvent {
 `precision highp float;
 uniform sampler2D texture;
 uniform ivec2 texture_resolution;
-varying vec2 vUv;
+varying vec2 v_uv;
 
 void main(void){
 	vec2 area = vec2(
 		float(texture_resolution.x) / exp2(ceil(log2(float(texture_resolution.x)))),
 		float(texture_resolution.y) / exp2(ceil(log2(float(texture_resolution.y))))
 	);
-	vec2 p = vUv;
+	vec2 p = v_uv;
 	float wave = 0.0;
 	for(int i = 0; i < 128; i++) {
 		vec4 key = texture2D(texture, vec2(float(i) / 127.0, 0.0));
