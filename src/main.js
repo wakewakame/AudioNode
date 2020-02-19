@@ -8,7 +8,7 @@ const PageEvent = HydrangeaJS.GUI.Page.PageEvent;
 const NodeCanvas = HydrangeaJS.GUI.Templates.NodeCanvas;
 const TimeNode = HydrangeaJS.Extra.ShaderNode.TimeNode;
 const PictureNode = HydrangeaJS.Extra.ShaderNode.PictureNode;
-const ShaderNode = HydrangeaJS.Extra.ShaderNode.ShaderNode;
+const ShaderAndFrameNode = HydrangeaJS.Extra.ShaderNode.ShaderAndFrameNode;
 const FrameNode = HydrangeaJS.Extra.ShaderNode.FrameNode;
 const ValueNode = HydrangeaJS.Extra.ShaderNode.ValueNode;
 const Audio = HydrangeaJS.Extra.Audio.Audio;
@@ -104,7 +104,7 @@ const NodeCanvasExt = class extends NodeCanvas{
 		this.audio = new Audio();
 		this.midi = new Midi();
 		this.audioInput = this.add(new AudioInputNode(30, 30, this.audio.array_length));
-		this.audioOutput = this.add(new AudioOutputNode(530, 30, this.audio.array_length));
+		this.audioOutput = this.add(new AudioOutputNode(530, 30));
 		this.midiInput = this.add(new MidiInputNode(30, 230, this.midi));
 		this.audio.setCallback((input, output, inputSampleRate, outputSampleRate) => {
 			const tmpArray = new Float32Array(input.length * 4);
@@ -116,7 +116,7 @@ const NodeCanvasExt = class extends NodeCanvas{
 			}
 			this.audioInput.inputWave = tmpArray;
 			this.resetAndJob();
-			this.audioOutput.frameBuffer.read(tmpArray)
+			this.audioOutput.read(tmpArray)
 			for (let i = 0; i < output.length; i++) {
 				output[i] = tmpArray[i * 4 + 0];
 			}
@@ -147,37 +147,53 @@ const OriginalPageEvent = class extends PageEvent {
 	}
 	init(page) {
 		this.nodeCanvas = page.addComponent(new NodeCanvasExt(page));
-		let node1 = this.nodeCanvas.add(new ShaderNode("copy", 30 + 250 * 1, 150, 500));
+		let node1 = this.nodeCanvas.add(new ShaderAndFrameNode("copy", 30 + 250 * 1, 150, 500));
 
 		this.nodeCanvas.add(new CreateEmptyNodeButton(280, 330));
 
 		node1.setCode(
-`precision highp float;
-uniform sampler2D texture;
-uniform ivec2 texture_resolution;
-varying vec2 v_uv;
-
-void main(void){
-	vec2 area = vec2(
-		float(texture_resolution.x) / exp2(ceil(log2(float(texture_resolution.x)))),
-		float(texture_resolution.y) / exp2(ceil(log2(float(texture_resolution.y))))
-	);
-	vec2 p = v_uv;
-	float wave = 0.0;
-	for(int i = 0; i < 128; i++) {
-		vec4 key = texture2D(texture, vec2(float(i) / 127.0, 0.0));
-		float hz = 440.0 * pow(2.0, (float(i) - 69.0) / 12.0);
-		float len = 44100.0;
-		float pi = 3.14159265;
-		if (key.r != 0.0) wave += 0.3 * key.r * sin(hz * 2.0 * pi * 1024.0 * (key.g + p.x) / len);
-	}
-	gl_FragColor = vec4(wave, 0.0, 0.0, 1.0);
+`{
+	"code": "
+		precision highp float;
+		uniform sampler2D input_frame;
+		uniform vec2 input_frame_area;
+		varying vec2 v_uv;
+		
+		void main(void){
+			vec2 p = v_uv * input_frame_area;
+			float wave = 0.0;
+			for(int i = 0; i < 128; i++) {
+				vec4 key = texture2D(input_frame, vec2(float(i) / 127.0, 0.0));
+				float hz = 440.0 * pow(2.0, (float(i) - 69.0) / 12.0);
+				float len = 44100.0;
+				float pi = 3.14159265;
+				if (key.r != 0.0) wave += 0.3 * key.r * sin(hz * 2.0 * pi * 1024.0 * (key.g + p.x) / len);
+			}
+			gl_FragColor = vec4(wave - 0.0, 0.0, 0.0, 1.0);
+		}
+	",
+	"output_width": 1024,
+	"output_height": 1,
+	"output_type": "FLOAT",
+	"preview": "
+		precision highp float;
+		uniform sampler2D output_frame;
+		uniform vec2 output_frame_area;
+		varying vec2 v_uv;
+		
+		void main(void){
+			vec2 p = v_uv * output_frame_area;
+			float wave = texture2D(output_frame, p).r / 2.0;
+			p.y = (p.y * 2.0) - 1.0;
+			float g = (p.y > wave) ? 1.0 : 0.0;
+			gl_FragColor = vec4(vec3(g), 1.0);
+		}
+	"
 }`
 		);
 
-		node1.inputs.childs[0].output = this.nodeCanvas.midiInput.outputs.childs[0];
-		node1.inputs.childs[1].output = this.nodeCanvas.audioInput.outputs.childs[1];
-		this.nodeCanvas.audioOutput.inputs.childs[0].output = node1.outputs.childs[0];
+		node1.setInput(this.nodeCanvas.midiInput, "output frame", "input_frame");
+		this.nodeCanvas.audioOutput.setInput(node1, "output frame", "input frame");
 
 		let json = nodesToJson(this.nodeCanvas.childs);
 		console.log(json);
@@ -191,7 +207,7 @@ void main(void){
 			) continue;
 			this.nodeCanvas.audio.loadSound(URL.createObjectURL(files[i]), (e) => {
 				this.nodeCanvas.add(new AudioBufferNode(files[i].name, 30, 30, e));
-			}, (e) => console.log(e));
+			}, console.log);
 		}
 	}
 };

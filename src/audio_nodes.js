@@ -1,5 +1,6 @@
 import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/hydrangea.js";
 
+const Node = HydrangeaJS.GUI.Templates.Node;
 const FrameNode = HydrangeaJS.Extra.ShaderNode.FrameNode;
 const ValueNodeParam = HydrangeaJS.Extra.ShaderNode.ValueNodeParam;
 
@@ -107,37 +108,71 @@ void main(void){
 		}
 	}
 };
-export const AudioOutputNode = class extends FrameNode {
-	constructor(x, y, array_length) {
-		super(
-			"audio output",
-			x, y, array_length, 1
-		);
-		this.type = "audio output frame";
+export const AudioOutputNode = class extends Node {
+	constructor(x, y) {
+		super("audio output frame", "audio output", x, y);
+		this.inputFrameNodeParam = null;
+		this.previewShader = null;
+		this.emptyTexture = null;
+	}
+	read(array){
+		if (this.inputFrameNodeParam.output === null || this.inputFrameNodeParam.output.value.frame === null){
+			array.fill(0);
+			return;
+		}
+		const frame = this.inputFrameNodeParam.output.value.frame;
+		const width = Math.floor(array.length / 4);
+		if (frame.texture.width < width){
+			array.fill(0);
+			return;
+		}
+		frame.read(array, 0, 0, width, 1);
 	}
 	setup() {
 		super.setup();
-		this.resizeFrame(
-			this.frameBufferState.width, this.frameBufferState.height,
-			this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.FLOAT
-		);
-		this.outputs.remove(this.outputShaderNodeParam);
-		this.outputs.remove(this.outputResolutionNodeParam);
-		this.inputs.remove(this.inputResolutionNodeParam);
+		this.inputFrameNodeParam = this.inputs.add(new ValueNodeParam("frame", "input frame"));
+		this.previewShader = this.graphics.createShader();
 		this.previewShader.loadShader(this.previewShader.default_shader.vertex, `
 precision highp float;
 uniform sampler2D texture;
-uniform ivec2 textureArea;
+uniform vec2 texture_area;
 varying vec2 v_uv;
 
 void main(void){
-	vec2 p = v_uv * vec2(textureArea);
+	vec2 p = v_uv * texture_area;
 	float wave = texture2D(texture, p).r / 2.0;
-	p.y = (p.y * 2.0) - 1.0;
-	float g = (p.y > wave) ? 1.0 : 0.0;
+	wave = wave * 0.5 + 0.5;
+	float g = (v_uv.y > wave) ? 1.0 : 0.0;
 	gl_FragColor = vec4(vec3(g), 1.0);
 }
 		`);
+		this.emptyTexture = this.graphics.createTexture(1, 1);
+		this.emptyTexture.update(new Uint8Array([0, 0, 0, 0]));
+	}
+	deleted(){
+		super.deleted();
+		this.previewShader.delete();
+		this.emptyTexture.delete();
+	}
+	draw(){
+		super.draw();
+		let tmp_current_shader = this.graphics.current_shader;
+		this.graphics.shader(this.previewShader);
+		if (this.inputFrameNodeParam.output !== null && this.inputFrameNodeParam.output.value.frame !== null){
+			const texture = this.inputFrameNodeParam.output.value.frame.texture;
+			this.previewShader.set("texture", texture);
+			this.previewShader.set(
+				"texture_area",
+				texture.width  / texture.pow2_width,
+				texture.height / texture.pow2_height
+			);
+		}
+		else{
+			this.previewShader.set("texture", this.emptyTexture);
+			this.previewShader.set("texture_area",1, 1);
+		}
+		this.graphics.shape(this.inner_shape);
+		this.graphics.shader(tmp_current_shader);
 	}
 };
 export const MidiInputNode = class extends FrameNode {

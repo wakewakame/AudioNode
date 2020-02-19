@@ -1,7 +1,7 @@
 import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/hydrangea.js";
 
 const Node = HydrangeaJS.GUI.Templates.Node;
-const ShaderNode = HydrangeaJS.Extra.ShaderNode.ShaderNode;
+const ShaderAndFrameNode = HydrangeaJS.Extra.ShaderNode.ShaderAndFrameNode;
 const FrameNode = HydrangeaJS.Extra.ShaderNode.FrameNode;
 const ValueNode = HydrangeaJS.Extra.ShaderNode.ValueNode;
 const TimeNode = HydrangeaJS.Extra.ShaderNode.TimeNode;
@@ -24,7 +24,7 @@ export const CreateEmptyNodeButton = class extends Node {
 		this.generateTypes = {
 			"byte frame": () => { return new FrameNode("byte frame", this.x, this.y, 1, 1, this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.UNSIGNED_BYTE); },
 			"float frame": () => { return new FrameNode("float frame", this.x, this.y, 1, 1, this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.FLOAT); },
-			"shader": () => { return new ShaderNode("empty", this.x, this.y, 500); },
+			"shader": () => { return new ShaderAndFrameNode("empty", this.x, this.y, 500); },
 			"float": () => { return new ValueNode("float", "empty", this.x, this.y, 500); },
 			"int": () => { return new ValueNode("int", "empty", this.x, this.y, 500); },
 			"vec2": () => { return new ValueNode("vec2", "empty", this.x, this.y, 500); },
