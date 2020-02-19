@@ -54,7 +54,7 @@ const NodeCanvasExt = class extends ConvertibleNodeCanvas{
 					if (
 						code !== "" &&
 						code !== this.childs[0].json["custom"].compileState.code
-					) this.childs[0].json["custom"].setCode(code);
+					) this.childs[0].setCode(code);
 				}
 			}
 		});
@@ -113,6 +113,10 @@ const OriginalPageEvent = class extends PageEvent {
 	}
 	init(page) {
 		this.nodeCanvas = page.addComponent(new NodeCanvasExt(page));
+
+		this.nodeCanvas.load([{"unique_id":0,"type":"audio input frame","name":"audio input","x":30,"y":30,"w":140,"h":24,"inpus":[],"custom":{"frameBufferState":{"width":1024,"height":1,"format":6408,"type":5126},"array_length":1024},"inputs":[]},{"unique_id":1,"type":"audio output frame","name":"audio output","x":530,"y":30,"w":140,"h":24,"inpus":[],"custom":{},"inputs":[{"srcNodeId":0,"srcParamName":"output frame","thisParamName":"input frame"}]},{"unique_id":2,"type":"midi input frame","name":"midi input","x":30,"y":230,"w":140,"h":24,"inpus":[],"custom":{"frameBufferState":{"width":128,"height":1,"format":6408,"type":5126}},"inputs":[]},{"unique_id":3,"type":"filter","name":"copy","x":280,"y":150,"w":140,"h":24,"inpus":[],"custom":{"frameBufferState":{"width":512,"height":512,"type":5121},"compileState":{"initialized":true,"lastChangeTime":1582155617967,"isCompiled":false,"code":"{\n\t\"code\": \"\n\t\tprecision highp float;\n\t\tuniform sampler2D input_frame;\n\t\tuniform vec2 input_frame_area;\n\t\tvarying vec2 v_uv;\n\t\t\n\t\tvoid main(void){\n\t\t\tvec2 p = v_uv * input_frame_area;\n\t\t\tfloat wave = 0.0;\n\t\t\tfor(int i = 0; i < 128; i++) {\n\t\t\t\tvec4 key = texture2D(input_frame, vec2(float(i) / 127.0, 0.0));\n\t\t\t\tfloat hz = 440.0 * pow(2.0, (float(i) - 69.0) / 12.0);\n\t\t\t\tfloat len = 44100.0;\n\t\t\t\tfloat pi = 3.14159265;\n\t\t\t\tif (key.r != 0.0) wave += 0.3 * key.r * sin(hz * 2.0 * pi * 1024.0 * (key.g + p.x) / len);\n\t\t\t}\n\t\t\tgl_FragColor = vec4(wave - 0.0, 0.0, 0.0, 1.0);\n\t\t}\n\t\",\n\t\"output_width\": 1024,\n\t\"output_height\": 1,\n\t\"output_type\": \"FLOAT\",\n\t\"preview\": \"\n\t\tprecision highp float;\n\t\tuniform sampler2D output_frame;\n\t\tuniform vec2 output_frame_area;\n\t\tvarying vec2 v_uv;\n\t\t\n\t\tvoid main(void){\n\t\t\tvec2 p = v_uv * output_frame_area;\n\t\t\tfloat wave = texture2D(output_frame, p).r / 2.0;\n\t\t\tp.y = (p.y * 2.0) - 1.0;\n\t\t\tfloat g = (p.y > wave) ? 1.0 : 0.0;\n\t\t\tgl_FragColor = vec4(vec3(g), 1.0);\n\t\t}\n\t\"\n}","error":"","latency":500}},"inputs":[{"srcNodeId":2,"srcParamName":"output frame","thisParamName":"input_frame"}]},{"unique_id":4,"type":"create","name":"💪😀💪やぁ","x":280,"y":330,"w":140,"h":24,"inpus":[],"custom":{},"inputs":[]}]);
+
+		/*
 		let node1 = this.nodeCanvas.add(new ShaderAndFrameNode("copy", 30 + 250 * 1, 150, 500));
 
 		this.nodeCanvas.add(new CreateEmptyNodeButton(280, 330));
@@ -160,6 +164,9 @@ const OriginalPageEvent = class extends PageEvent {
 
 		node1.setInput(this.nodeCanvas.midiInput, "output frame", "input_frame");
 		this.nodeCanvas.audioOutput.setInput(node1, "output frame", "input frame");
+
+		console.log(JSON.stringify(this.nodeCanvas.save()));
+		*/
 	}
 	dropFiles(page, files) {
 		for(let i = 0; i < files.length; i++) {
