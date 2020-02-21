@@ -26,7 +26,7 @@ export const AudioBufferNode = class extends FrameNode {
 	setup() {
 		super.setup();
 		this.resizeFrame(
-			this.frameBufferState.width, this.frameBufferState.height,
+			this.json["custom"].frameBufferState.width, this.json["custom"].frameBufferState.height,
 			this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.FLOAT
 		);
 		this.inputs.remove(this.inputShaderNodeParam);
@@ -137,6 +137,7 @@ export const AudioOutputNode = class extends ConvertibleNode {
 	}
 	setup() {
 		super.setup();
+		this.resize(this.w, this.w);
 		this.inputFrameNodeParam = this.inputs.add(new ValueNodeParam("frame", "input frame"));
 		this.previewShader = this.graphics.createShader();
 		this.previewShader.loadShader(this.previewShader.default_shader.vertex, `

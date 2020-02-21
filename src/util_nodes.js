@@ -117,7 +117,7 @@ export const CreateEmptyNodeButton = class extends ConvertibleNode {
 					const empty = this.parent.add(
 						Object.values(this.generateTypes)[this.currentGenerateType]()
 					);
-					empty.resize(this.w, this.h);
+					empty.resize(140, 140);
 					this.parent.activeChilds(empty);
 					break;
 				case 1:
