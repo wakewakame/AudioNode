@@ -2,7 +2,7 @@
 This program outputs AudioNode logo in svg format.
 It works with p5.js.
 You can try p5.js from the following URL.
-https://editor.p5js.org/dannyrozin/sketches/
+https://editor.p5js.org/dannyrozin/sketches/r1djoVow7
 */
 
 const cornerCircleVertex = (x1, y1, x2, y2, x3, y3) => {
@@ -33,81 +33,88 @@ const sinVezierVertex = (x1, x2, y, height, repeat, over) => {
   }
 };
 
-const node = (center_x, center_y, width, aspect, weight, repeat) => {
-  //resize
-  const edge = weight * 2;
-  const left = center_x - width * 0.5 + (weight + edge) * 0.5;
-  width -= weight + edge;
-  const height = width * aspect;
-  const top = center_y - height * 0.5;
-  
+const getParam = (filename, width, aspect, weight, repeat) => {
+  let param = {
+    filename: filename,
+    width: width,
+    outer_width: width,
+    aspect: aspect,
+    weight: weight,
+    repeat: repeat
+  };
+  param.edge = param.weight * 2;
+  param.center_x = param.outer_width * 0.5;
+  param.left = param.center_x - param.width * 0.5 + (param.weight + param.edge) * 0.5;
+  param.width -= param.weight + param.edge;
+  param.height = param.width * param.aspect;
+  param.outer_height = param.height + param.edge * 0.5;
+  param.center_y = param.outer_height * 0.5;
+  param.top = param.center_y - param.height * 0.5;
+  return param;
+};
+
+const node = (param) => {  
   // config
   strokeCap(SQUARE);
   noFill();
   stroke(255, 41, 137);
   
   // around
-  strokeWeight(weight);
+  strokeWeight(param.weight);
   beginShape();
   cornerCircleVertex(
-    left, top + edge,
-    left, top,
-    left + edge, top
+    param.left, param.top + param.edge,
+    param.left, param.top,
+    param.left + param.edge, param.top
   );
   cornerCircleVertex(
-    left + width - edge, top,
-    left + width, top,
-    left + width, top + edge
+    param.left + param.width - param.edge, param.top,
+    param.left + param.width, param.top,
+    param.left + param.width, param.top + param.edge
   );
   endShape();
   beginShape();
   cornerCircleVertex(
-    left, top + height - edge,
-    left, top + height,
-    left + edge, top + height
+    param.left, param.top + param.height - param.edge,
+    param.left, param.top + param.height,
+    param.left + param.edge, param.top + param.height
   );
   cornerCircleVertex(
-    left + width - edge, top + height,
-    left + width, top + height,
-    left + width, top + height - edge
+    param.left + param.width - param.edge, param.top + param.height,
+    param.left + param.width, param.top + param.height,
+    param.left + param.width, param.top + param.height - param.edge
   );
   endShape();
   
   // sin wave
-  strokeWeight(weight * 0.6);
+  strokeWeight(param.weight * 0.6);
   beginShape();
   sinVezierVertex(
-    left + edge * 0.5, left + width - edge * 0.5,
-    top + height * 0.5, height * 0.14, repeat, 0.7
+    param.left + param.edge * 0.5, param.left + param.width - param.edge * 0.5,
+    param.top + param.height * 0.5, param.height * 0.14, param.repeat, 0.7
   );
   endShape();
   beginShape();
   sinVezierVertex(
-    left + edge * 0.5, left + width - edge * 0.5,
-    top + height * 0.5, height * 0.14, repeat, 2
+    param.left + param.edge * 0.5, param.left + param.width - param.edge * 0.5,
+    param.top + param.height * 0.5, param.height * 0.14, param.repeat, 2
   );
   endShape();
 
   // circle
-  strokeWeight(weight);
-  ellipse(left, top + height * 0.5, edge, edge);
-  ellipse(left + width, top + height * 0.5, edge, edge);
+  strokeWeight(param.weight);
+  ellipse(param.left, param.top + param.height * 0.5, param.edge, param.edge);
+  ellipse(param.left + param.width, param.top + param.height * 0.5, param.edge, param.edge);
 };
 
-const param = (aspect, weight, repeat) => {
-  node(width * 0.5, height * 0.5, width, aspect, size * weight, repeat);
-};
-
-let size = 512;
 
 function setup() {
-  createCanvas(size, size, SVG); // Create SVG Canvas
-}
-
-function draw() {
-  param(2/3, 0.092, 2);
-  save("audio_node_logo.svg");
-  //param(1, 0.12, 1);
-  //save("audio_node_logo_small.svg");
-  noLoop();
+  const size = 512;
+  let param = {};
+  param = getParam("audio_node_logo.svg", size, 2/3, size * 0.092, 2);
+  //param = getParam("audio_node_logo_small.svg", size, 1, size * 0.12, 1);
+  createCanvas(param.outer_width, param.outer_height, SVG);
+  background(0);
+  node(param);
+  save(p.filename);
 }
