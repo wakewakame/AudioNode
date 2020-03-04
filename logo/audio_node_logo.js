@@ -114,7 +114,6 @@ function setup() {
   param = getParam("audio_node_logo.svg", size, 2/3, size * 0.092, 2);
   //param = getParam("audio_node_logo_small.svg", size, 1, size * 0.12, 1);
   createCanvas(param.outer_width, param.outer_height, SVG);
-  background(0);
   node(param);
   save(param.filename);
 }
