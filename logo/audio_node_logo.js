@@ -116,5 +116,5 @@ function setup() {
   createCanvas(param.outer_width, param.outer_height, SVG);
   background(0);
   node(param);
-  save(p.filename);
+  save(param.filename);
 }
