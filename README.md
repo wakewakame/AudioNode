@@ -1,3 +1,6 @@
+# AudioNode  
+<img src="https://wakewakame.github.io/AudioNode/logo/audio_node_logo.svg" width="200" height="200">  
+
 # How to build  
 
 `$ npm install`  
