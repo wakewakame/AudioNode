@@ -46,39 +46,12 @@ const print = () => {
   // text
   stroke(255, 41, 137);
 
-  let or = 30, ir = 2 / 7, sharp = 2 / 5, gap = 8.0;
+  let or = 30, ir = 2 / 7, sharp = 2 / 5, gap = 10;
   
+  translate(0, or * 0.5);
   translate(or + 0.5, or + 0.5);
   
   push();
-  beginShape();
-  corner(0, 0, or, or, 0, false);
-  corner(0, 0, or, or, 1, false);
-  corner(0, 0, or, or, 2, false);
-  corner(0, 0, or, or * ir, 3, false);
-  vertex(or, 0);
-  vertex(or * ir, 0);
-  corner(0, 0, or * ir, or * ir * sharp, 3, true);
-  corner(0, 0, or * ir, or * ir, 2, true);
-  corner(0, 0, or * ir, or * ir, 1, true);
-  corner(0, 0, or * ir, or * ir, 0, true);
-  endShape(CLOSE);
-  translate(or, 0);
-  
-  translate(or + gap, 0);
-  beginShape();
-  corner(0, 0, or, or * ir * sharp, 0, false);
-  corner(or * (ir + 1), 0, or, or * ir * sharp, 1, false);
-  corner(or * (ir - 1), or * (ir - 1), or, or * ir * sharp, 3, true);
-  corner(or * (1 - ir), or * (ir - 1), or, or * ir, 2, true);
-  corner(- or * (ir + 1), 0, or, or * ir * sharp, 0, false);
-  corner(0, 0, or, or * ir * sharp, 1, false);
-  corner(0, 0, or, or, 2, false);
-  corner(0, 0, or, or * ir, 3, false);
-  endShape(CLOSE);
-  translate(or, 0);
-
-  translate(or + gap * 1.2, 0);
   beginShape();
   corner(0, 0, or, or, 0, false);
   corner(0, 0, or, or * ir, 1, false);
@@ -103,14 +76,51 @@ const print = () => {
   corner(0, 0, or * ir, or * ir, 0, true);
   endShape(CLOSE);
   translate(or, 0);
+  
+  translate(or + gap, 0);
+  beginShape();
+  corner(0, -or * 0.5, or, or * ir * sharp, 0, false);
+  corner(or * (ir + 1), -or * 0.5, or, or * ir * sharp, 1, false);
+  corner(or * (ir - 1), or * -2, or, or * ir * sharp, 3, true);
+  corner(0, 0, or, or, 1, false);
+  corner(0, 0, or, or, 2, false);
+  corner(-or * (1 - ir), 0, or, or * ir * sharp, 3, false);
+  corner(-or * (1 - ir), or * (1 + ir), or, or * ir * sharp, 4, false);
+  corner(or * (1 - ir), -or * (1 - ir), or, or * ir, 2, true);
+  corner(or * (1 - ir), or * (1 - ir), or, or * ir, 1, true);
+  corner(0, -or * (1 + ir), or, or * ir, 3, false);
+  endShape(CLOSE);
+  translate(or, 0);
+  
+  translate(gap - or * ir + 2, 0);
+  beginShape();
+  corner(0, 0, or, or * ir * sharp, 0, false);
+  corner(or * (ir + 1), 0, or, or * ir * sharp, 1, false);
+  corner(or * (ir + 1), 0, or, or * ir * sharp, 2, false);
+  corner(0, 0, or, or * ir * sharp, 3, false);
+  endShape(CLOSE);
+  translate(or, 0);
+  
+  translate(or + gap + 2, 0);
+  beginShape();
+  corner(0, 0, or, or, 0, false);
+  corner(0, 0, or, or, 1, false);
+  corner(0, 0, or, or, 2, false);
+  corner(0, 0, or, or, 3, false);
+  corner(0, 0, or * ir, or * ir, 3, true);
+  corner(0, 0, or * ir, or * ir, 2, true);
+  corner(0, 0, or * ir, or * ir, 1, true);
+  corner(0, 0, or * ir, or * ir, 0, true);
+  endShape(CLOSE);
+  translate(or, 0);
   pop();
 };
 
 
 function setup() {
   const size = 512;
-  createCanvas(60 * 4 + 8 * 3 + 8 * 0.2 + 1, 60 + 1, SVG);
+  createCanvas(60 * 5 + 10 * 4 - 30 * (1 + 2 / 7) + 4 + 1, 75 + 1, SVG);
   //background(0);
   print();
-  save("audio_node_logo_text.svg");
+  save("logo_text.svg");
 }
