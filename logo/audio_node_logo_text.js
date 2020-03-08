@@ -46,7 +46,7 @@ const print = () => {
   // text
   stroke(255, 41, 137);
 
-  let or = 30, ir = 2 / 7, sharp = 2 / 5, gap = 10;
+  let or = 30, ir = 2 / 7, sharp = 2 / 5, gap = 8;
   
   translate(0, or * 0.5);
   translate(or + 0.5, or + 0.5);
@@ -84,15 +84,15 @@ const print = () => {
   corner(or * (ir - 1), or * -2, or, or * ir * sharp, 3, true);
   corner(0, 0, or, or, 1, false);
   corner(0, 0, or, or, 2, false);
-  corner(-or * (1 - ir), 0, or, or * ir * sharp, 3, false);
-  corner(-or * (1 - ir), or * (1 + ir), or, or * ir * sharp, 4, false);
+  corner(-or * (1 - ir) * 0.5, 0, or, or * ir * sharp, 3, false);
+  corner(-or * (1 - ir) * 0.5, or * (1 + ir), or, or * ir * sharp, 4, false);
   corner(or * (1 - ir), -or * (1 - ir), or, or * ir, 2, true);
   corner(or * (1 - ir), or * (1 - ir), or, or * ir, 1, true);
   corner(0, -or * (1 + ir), or, or * ir, 3, false);
   endShape(CLOSE);
   translate(or, 0);
   
-  translate(gap - or * ir + 2, 0);
+  translate(gap * 1.2 - or * ir, 0);
   beginShape();
   corner(0, 0, or, or * ir * sharp, 0, false);
   corner(or * (ir + 1), 0, or, or * ir * sharp, 1, false);
@@ -101,7 +101,7 @@ const print = () => {
   endShape(CLOSE);
   translate(or, 0);
   
-  translate(or + gap + 2, 0);
+  translate(or + gap * 1.2, 0);
   beginShape();
   corner(0, 0, or, or, 0, false);
   corner(0, 0, or, or, 1, false);
@@ -119,7 +119,7 @@ const print = () => {
 
 function setup() {
   const size = 512;
-  createCanvas(60 * 5 + 10 * 4 - 30 * (1 + 2 / 7) + 4 + 1, 75 + 1, SVG);
+  createCanvas(60 * 5 + 8 * 4.4 - 30 * (1 + 2 / 7) + 1, 75 + 1, SVG);
   //background(0);
   print();
   save("logo_text.svg");
