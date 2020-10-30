@@ -1,5 +1,5 @@
-<img src="https://wakewakame.github.io/AudioNode/logo/audio_node_logo.svg" width="200"><br>  
-<img src="https://wakewakame.github.io/AudioNode/logo/audio_node_logo_text.svg" width="200">  
+<img src="logo/audio_node_logo.svg" width="200"><br>  
+<img src="logo/audio_node_logo_text.svg" width="200">  
 
 ![demo](image/demo.gif)
 
