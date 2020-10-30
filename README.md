@@ -1,6 +1,8 @@
 <img src="https://wakewakame.github.io/AudioNode/logo/audio_node_logo.svg" width="200"><br>  
 <img src="https://wakewakame.github.io/AudioNode/logo/audio_node_logo_text.svg" width="200">  
 
+![demo](image/demo.gif)
+
 # AudioNode
 大学3年生のころに作成した、ブラウザ上で動作するノードベースの音声処理ソフトです。
 様々なノードを画面に追加し、それらを繋げることでリアルタイムな音声処理を行えます。
@@ -9,7 +11,7 @@
 以下はバンドパスフィルターを実装した例です。
 ノイズに対してバンドパス処理を行い、スピーカーから音を出力しています。
 
-![demo](demo/demo.gif)
+![demo](image/bandpass.gif)
 
 入力にはマイク、音声ファイル、MIDI入力、画像ファイルの4つに対応しています。
 出力はスピーカーのみに対応しています。
