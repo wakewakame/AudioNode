@@ -1,3 +1,4 @@
+import * as monaco from 'monaco-editor';
 import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/hydrangea.js";
 import { Midi } from "./midi.js";
 import { AudioBufferNode, AudioInputNode, AudioOutputNode, MidiInputNode } from "./audio_nodes.js";
@@ -38,16 +39,17 @@ const NodeCanvasExt = class extends ConvertibleNodeCanvas{
 		this.activeNode = null;
 		this.editorElement = this.page.addElement("div", 0.0, 0.5, 1.0, 1.0, {
 			"background": "#FFFFFF80",
-			"display": "none"
+			"display": "none",
+			"width": "100%",
+			"height": "100%",
 		});
-		this.editorElement.id = "shader_editor";
-		this.editor = ace.edit(this.editorElement.id);
-		this.editor.setTheme("ace/theme/tomorrow");
-		this.editor.setOptions({
-			fontSize: "14pt"
+		this.editor = monaco.editor.create(this.editorElement, {
+			value: 'console.log("Hello, world")',
+			language: 'text',
+			fontSize: "14px",
 		});
-		this.editor.getSession().setMode("ace/mode/glsl");
-		this.editor.on("change", (e) => {
+
+		this.editor.onDidChangeModelContent(e => {
 			if (this.childs.length > 0) {
 				if (this.childs[0].json["custom"].hasOwnProperty("compileState")) {
 					const code = this.editor.getValue();
@@ -58,7 +60,7 @@ const NodeCanvasExt = class extends ConvertibleNodeCanvas{
 				}
 			}
 		});
-		this.addEventListener("DOWN", e => {
+		this.addEventListener("DOWN", _ => {
 			this.activeNode = null;
 			this.editorElement.style["display"] = "none";
 		});
@@ -99,8 +101,9 @@ const NodeCanvasExt = class extends ConvertibleNodeCanvas{
 			this.editorElement.style["display"] = "none";
 			if (this.childs[0].json["custom"].hasOwnProperty("compileState")) {
 				this.editorElement.style["display"] = "inline";
-				this.editor.setValue(this.activeNode.json["custom"].compileState.code);
-				this.editor.gotoLine(1, 0);
+				this.editor.layout();
+				this.editor.getModel().setValue(this.activeNode.json["custom"].compileState.code);
+				this.editor.revealLine(0);
 			}
 		});
 		return ret;
