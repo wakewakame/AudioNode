@@ -1,4 +1,4 @@
-import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/hydrangea.js";
+import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/index.js";
 
 export const Midi = class extends HydrangeaJS.Utils.EventListener {
 	constructor() {

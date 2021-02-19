@@ -1,5 +1,4 @@
-import * as monaco from 'monaco-editor';
-import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/hydrangea.js";
+import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/index.js";
 import { Midi } from "./midi.js";
 import { AudioBufferNode, AudioInputNode, AudioOutputNode, MidiInputNode } from "./audio_nodes.js";
 import { CreateEmptyNodeButton } from "./util_nodes.js";
@@ -16,6 +15,7 @@ const ShaderAndFrameNode = HydrangeaJS.Extra.ShaderNode.ShaderAndFrameNode;
 const ValueNode = HydrangeaJS.Extra.ShaderNode.ValueNode;
 const ValueNodeParam = HydrangeaJS.Extra.ShaderNode.ValueNodeParam;
 const Audio = HydrangeaJS.Extra.Audio.Audio;
+const monaco = HydrangeaJS.monaco;
 
 const NodeCanvasExt = class extends ConvertibleNodeCanvas{
 	constructor(page) {

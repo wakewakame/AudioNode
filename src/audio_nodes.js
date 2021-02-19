@@ -1,4 +1,4 @@
-import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/hydrangea.js";
+import { HydrangeaJS } from "../3rdparty/HydrangeaJS/src/index.js";
 
 const ConvertibleNode = HydrangeaJS.GUI.Templates.ConvertibleNode;
 const FrameNode = HydrangeaJS.Extra.ShaderNode.FrameNode;
