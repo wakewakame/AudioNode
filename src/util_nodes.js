@@ -10,7 +10,7 @@ export const CreateEmptyNodeButton = class extends ConvertibleNode {
 	constructor(x = 0, y = 0) {
 		super();
 		this.type = "create";
-		this.name = "💪😀💪やぁ";
+		this.name = "クリックで新しいノードを追加";
 		this.x = x;
 		this.y = y;
 		this.textWidth = 0.0;
@@ -24,7 +24,7 @@ export const CreateEmptyNodeButton = class extends ConvertibleNode {
 	setup() {
 		super.setup();
 		this.createText = this.graphics.createTexture(1, 1);
-		this.createText.loadText("create", "#303030", 100, "monospace", true);
+		this.createText.loadText("ノードの種類", "#303030", 100, "monospace", true);
 		this.generateTypes = {
 			"byte frame": () => { return new FrameNode("byte frame", this.x, this.y, 1, 1, this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.UNSIGNED_BYTE); },
 			"float frame": () => { return new FrameNode("float frame", this.x, this.y, 1, 1, this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.FLOAT); },
