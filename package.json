@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
-    "start": "webpack-cli serve --host 0.0.0.0 --https"
+    "start": "webpack-cli serve --host 0.0.0.0 --https",
+    "start_https": "webpack-cli serve --https",
+    "start_0000": "webpack-cli serve --host 0.0.0.0",
+    "start_https_0000": "webpack-cli serve --host 0.0.0.0 --https"
   },
   "keywords": [],
   "author": "",
