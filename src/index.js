@@ -19,7 +19,7 @@ const Audio = HydrangeaJS.Extra.Audio.Audio;
 const monaco = HydrangeaJS.monaco;
 
 const NodeCanvasExt = class extends ConvertibleNodeCanvas{
-	constructor(page) {
+	constructor(page, json = []) {
 		super({
 			"empty": ConvertibleNode,
 			"frame": FrameNode,
@@ -68,13 +68,33 @@ const NodeCanvasExt = class extends ConvertibleNodeCanvas{
 		this.audio = null;
 		this.audioInput = null;
 		this.audioOutput = null;
+		this.createButton = null;
+		this.json = json;
 	}
 	setup(){
 		this.audio = new Audio();
 		this.midi = new Midi();
-		this.audioInput  = this.add(new AudioInputNode(30, 30, this.audio.array_length));
+		this.audioInput = this.add(new AudioInputNode(30, 30, this.audio.array_length));
 		this.audioOutput = this.add(new AudioOutputNode(530, 30));
-		this.midiInput   = this.add(new MidiInputNode(30, 230, this.midi));
+		this.midiInput = this.add(new MidiInputNode(30, 230, this.midi));
+		this.createButton = this.add(new CreateEmptyNodeButton(280, 330));
+		const audioInputJson = this.json.filter(n => n["type"] === ("audio input frame"));
+		if (audioInputJson.length === 1) {
+			this.audioInput.load(audioInputJson[0]);
+		}
+		const audioOutputJson = this.json.filter(n => n["type"] === ("audio output frame"));
+		if (audioOutputJson.length === 1) {
+			this.audioOutput.load(audioOutputJson[0]);
+		}
+		const midiInputJson = this.json.filter(n => n["type"] === ("midi input frame"));
+		if (midiInputJson.length === 1) {
+			this.midiInput.load(midiInputJson[0]);
+		}
+		const createButtonJson = this.json.filter(n => n["type"] === ("create"));
+		if (createButtonJson.length === 1) {
+			this.createButton.load(createButtonJson[0]);
+		}
+		this.load(this.json);
 		this.audio.setCallback((input, output, inputSampleRate, outputSampleRate) => {
 			const tmpArray = new Float32Array(input.length * 4);
 			for (let i = 0; i < input.length; i++) {
@@ -117,70 +137,88 @@ const OriginalPageEvent = class extends PageEvent {
 		this.nodeCanvas = null;
 	}
 	init(page) {
-		this.nodeCanvas = page.addComponent(new NodeCanvasExt(page));
-
-		let node1 = this.nodeCanvas.add(new ShaderAndFrameNode("copy", 30 + 250 * 1, 150, 500));
-
-		this.nodeCanvas.add(new CreateEmptyNodeButton(280, 330));
-
-		node1.setCode(
-`{
-	"name": "MIDI to Sin",
-	"code": "
-		precision highp float;
-		uniform sampler2D input_frame;
-		uniform vec2 input_frame_area;
-		varying vec2 v_uv;
-		
-		void main(void){
-			vec2 p = v_uv * input_frame_area;
-			float wave = 0.0;
-			for(int i = 0; i < 128; i++) {
-				vec4 key = texture2D(input_frame, vec2(float(i) / 127.0, 0.0));
-				float hz = 440.0 * pow(2.0, (float(i) - 69.0) / 12.0);
-				float len = 44100.0;
-				float pi = 3.14159265;
-				if (key.r != 0.0) wave += 0.3 * key.r * sin(hz * 2.0 * pi * 1024.0 * (key.g + p.x) / len);
+		const json = 
+[
+	{
+		"unique_id":0,
+		"type":"audio input frame",
+		"name":"audio input",
+		"x":30,
+		"y":30,
+		"w":140,
+		"h":140,
+		"custom":{
+			"frameBufferState":{
+				"width":1024,
+				"height":1,
+				"format":6408,
+				"type":5126
+			},
+			"array_length":1024
+		},
+		"inputs":[]
+	},
+	{
+		"unique_id":1,
+		"type":"audio output frame",
+		"name":"audio output",
+		"x":530,
+		"y":30,
+		"w":140,
+		"h":140,
+		"inputs":[],
+		"custom":{},
+	},
+	{
+		"unique_id":2,
+		"type":"midi input frame",
+		"name":"midi input",
+		"x":30,
+		"y":230,
+		"w":140,
+		"h":100,
+		"custom":{
+			"frameBufferState":{
+				"width":128,
+				"height":1,
+				"format":6408,
+				"type":5126
 			}
-			gl_FragColor = vec4(wave - 0.0, 0.0, 0.0, 1.0);
-		}
-	",
-	"output_width": 1024,
-	"output_height": 1,
-	"output_type": "FLOAT",
-	"preview": "
-		precision highp float;
-		uniform sampler2D output_frame;
-		uniform vec2 output_frame_area;
-		varying vec2 v_uv;
-		
-		void main(void){
-			vec2 p = v_uv * output_frame_area;
-			float wave = texture2D(output_frame, p).r / 2.0;
-			p.y = (p.y * 2.0) - 1.0;
-			float g = (p.y > wave) ? 1.0 : 0.0;
-			gl_FragColor = vec4(vec3(g), 1.0);
-		}
-	"
-}`
-		);
+		},
+		"inputs":[]
+	},
+	{
+		"unique_id":3,
+		"type":"create",
+		"name":"クリックで新しいノードを追加",
+		"x":30,
+		"y":390,
+		"w":280,
+		"h":100,
+		"inpus":[],
+		"custom":{},
+		"inputs":[]
+	}
+];
 
-		//node1.setInput(this.nodeCanvas.midiInput, "output frame", "input_frame");
-		//this.nodeCanvas.audioOutput.setInput(node1, "output frame", "input frame");
+		this.nodeCanvas = page.addComponent(new NodeCanvasExt(page, json));
 
 		console.log(JSON.stringify(this.nodeCanvas.save()));
-
 	}
 	dropFiles(page, files) {
+		if (
+			(!this.nodeCanvas) ||
+			(!this.nodeCanvas.audio) ||
+			(!this.nodeCanvas.audio.start)
+		) return;
 		for(let i = 0; i < files.length; i++) {
-			if (
-				(!this.nodeCanvas) ||
-				(!this.nodeCanvas.audio) ||
-				(!this.nodeCanvas.audio.start)
-			) continue;
-			this.nodeCanvas.audio.loadSound(URL.createObjectURL(files[i]), (e) => {
-				this.nodeCanvas.add(new AudioBufferNode(files[i].name, 30, 30, e));
-			}, console.log);
+			const url = URL.createObjectURL(files[i]);
+			const name = files[i].name;
+			this.nodeCanvas.audio.loadSound(url, (e) => {
+				this.nodeCanvas.add(new AudioBufferNode(name, url, 30, 30, e));
+			}, () => {
+				this.nodeCanvas.add(new PictureNode(name, url, 30, 30));
+			});
 		}
 	}
 };

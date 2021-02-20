@@ -5,7 +5,7 @@ const FrameNode = HydrangeaJS.Extra.ShaderNode.FrameNode;
 const ValueNodeParam = HydrangeaJS.Extra.ShaderNode.ValueNodeParam;
 
 export const AudioBufferNode = class extends FrameNode {
-	constructor(name, x, y, audioBuffer) {
+	constructor(name, url, x, y, audioBuffer) {
 		super();
 		this.type = "audio frame";
 		this.name = name;
@@ -13,6 +13,7 @@ export const AudioBufferNode = class extends FrameNode {
 		this.y = y;
 		this.json["custom"].frameBufferState.width = 4096;
 		this.json["custom"].frameBufferState.height = 4096;
+		this.json["custom"].url = url;
 		this.audioBuffer = audioBuffer;
 		this.audioArray = new Float32Array(4096*4096*4);
 		for(let i = 0; i < this.audioBuffer.numberOfChannels; i++) {
@@ -195,7 +196,7 @@ export const MidiInputNode = class extends FrameNode {
 	}
 	setup() {
 		super.setup();
-		this.resize(60.0, 480.0);
+		this.resize(140.0, 140.0);
 		this.resizeFrame(
 			128, 1,
 			this.graphics.gapp.gl.RGBA, this.graphics.gapp.gl.FLOAT
@@ -237,8 +238,7 @@ int getKeyIndex(vec2 pos) {
 }
 
 void main( void ) {
-	vec2 p = vec2(v_uv.y, 1.0 - v_uv.x);
-	p.x *= 128.0 / 12.0;
+	vec2 p = v_uv;
 
 	int keyType = getKeyType(p);
 	vec3 col;
@@ -246,8 +246,12 @@ void main( void ) {
 	if (keyType == 0) col = vec3(1.0);
 	if (keyType == 1) col = vec3(0.2);
 
-	int keyIndex = getKeyIndex(p);
-	float key = texture2D(texture, vec2(float(keyIndex) / 128.0, 0.0)).r;
+	float key = 0.0;
+	for(int i = 0; i < 11; i++) {
+		int keyIndex = getKeyIndex(p) + (i * 12);
+		if (keyIndex >= 128) break;
+		key += texture2D(texture, vec2(float(keyIndex) / 128.0, 0.0)).r;
+	}
 	if (keyType != -1 && key > 0.0) col = col * 0.2 + vec3(1.0, 0.1, 0.3) * 0.8;
 
 	gl_FragColor = vec4(col, 1.0);
