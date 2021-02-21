@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Select Text Encode -->
+	<meta content="ja" http-equiv="Content-Language" />
+	<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+	<!-- Set Resolution -->
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<!-- full screen on iOS browser -->
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<!-- title -->
+	<title>AudioNode</title>
+	<!-- icon -->
+	<link rel="icon" href="../logo/audio_node_logo_small.ico" type="image/vnd.microsoft.icon">
+
+	<script type="application/javascript" src="../dst/app.js"></script>
+	<script type="application/javascript">
+		createAudioNodeCanvas(
+[
+  {
+    "unique_id": 0,
+    "type": "time",
+    "name": "time",
+    "x": 140.99999999999994,
+    "y": 266,
+    "w": 40,
+    "h": 80,
+    "inputs": [],
+    "custom": {}
+  },
+  {
+    "unique_id": 1,
+    "type": "audio input frame",
+    "name": "audio input",
+    "x": 52.000000000000014,
+    "y": 696.9999999999999,
+    "w": 140,
+    "h": 140.57282809406206,
+    "custom": {
+      "frameBufferState": {
+        "width": 1024,
+        "height": 1,
+        "format": 6408,
+        "type": 5126
+      },
+      "array_length": 1024
+    },
+    "inputs": []
+  },
+  {
+    "unique_id": 2,
+    "type": "audio output frame",
+    "name": "audio output",
+    "x": 590,
+    "y": 33,
+    "w": 140,
+    "h": 140.57282809406206,
+    "inputs": [
+      {
+        "srcNodeId": 5,
+        "srcParamName": "output frame",
+        "thisParamName": "input frame"
+      }
+    ],
+    "custom": {}
+  },
+  {
+    "unique_id": 3,
+    "type": "midi input frame",
+    "name": "midi input",
+    "x": 250,
+    "y": 736.9999999999999,
+    "w": 140,
+    "h": 101.52245352843795,
+    "custom": {
+      "frameBufferState": {
+        "width": 128,
+        "height": 1,
+        "format": 6408,
+        "type": 5126
+      }
+    },
+    "inputs": []
+  },
+  {
+    "unique_id": 4,
+    "type": "create",
+    "name": "クリックで新しいノードを追加",
+    "x": 447.9999999999999,
+    "y": 740,
+    "w": 299.9151215102925,
+    "h": 99.95968271738896,
+    "inpus": [],
+    "custom": {},
+    "inputs": []
+  },
+  {
+    "unique_id": 5,
+    "type": "filter",
+    "name": "copy",
+    "x": 316.99999999999994,
+    "y": 139,
+    "w": 140,
+    "h": 140.57282809406206,
+    "inputs": [
+      {
+        "srcNodeId": 6,
+        "srcParamName": "output frame",
+        "thisParamName": "texture"
+      },
+      {
+        "srcNodeId": 0,
+        "srcParamName": "output frame number",
+        "thisParamName": "frame_number"
+      }
+    ],
+    "custom": {
+      "frameBufferState": {
+        "width": 1024,
+        "height": 1,
+        "type": 5126
+      },
+      "compileState": {
+        "initialized": true,
+        "lastChangeTime": 1613926841176,
+        "isCompiled": true,
+        "code": "{\n\t\"name\": \"copy\",\n\t\"output_width\": 1024,\n\t\"output_height\": 1,\n\t\"output_type\": \"FLOAT\",\n\t\"code\": \"\n\t\tprecision highp float;\n\t\tuniform sampler2D texture;\n\t\tuniform vec4 texture_area;\n        uniform int frame_number;\n\t\tvarying vec2 v_uv;\n\n        float read(float f_index){\n            float index = floor(f_index * 1024.0);\n            vec2 pos = vec2(\n                floor(mod(index, 4096.0 * 4.0)) / (4.0 * 4096.0),\n                1.0 - floor(index / (4096.0 * 4.0)) / 4096.0\n            );\n            vec4 wave = texture2D(texture, pos);\n            if (mod(index, 4.0) == 0.0) return wave.r;\n            if (mod(index, 4.0) == 1.0) return wave.g;\n            if (mod(index, 4.0) == 2.0) return wave.b;\n            if (mod(index, 4.0) == 3.0) return wave.a;\n            return 0.0;\n        }\n\n\t\tvoid main(void){\n            float wave = read(v_uv.x + float(frame_number));\n\t\t\tgl_FragColor = vec4(0.0 - wave, 0.0, 0.0, 1.0);\n\t\t}\n\t\",\n    \"preview\": \"\n        precision highp float;\n        uniform sampler2D output_frame;\n        uniform vec2 output_frame_area;\n        varying vec2 v_uv;\n        \n        void main(void){\n            vec2 p = v_uv * output_frame_area;\n            float wave = texture2D(output_frame, p).r / 2.0;\n            p.y = (p.y * 2.0) - 1.0;\n            float g = (p.y > wave) ? 1.0 : 0.0;\n            gl_FragColor = vec4(vec3(g), 1.0);\n        }\n    \"\n}",
+        "error": "",
+        "latency": 500
+      }
+    }
+  },
+  {
+    "unique_id": 6,
+    "type": "audio frame",
+    "name": "music.mp3",
+    "x": 41,
+    "y": 36.00000000000001,
+    "w": 140,
+    "h": 140.57282809406206,
+    "inputs": [],
+    "custom": {
+      "frameBufferState": {
+        "width": 4096,
+        "height": 4096,
+        "format": 6408,
+        "type": 5126
+      },
+      "url": "../../3rdparty/HydrangeaJS/examples/music.mp3"
+    }
+  }
+]
+		);
+	</script>
+	
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159630441-1"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-159630441-1');
+	</script>
+</head>
+<body>
+</body>
+</html>
