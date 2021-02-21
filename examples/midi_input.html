@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Select Text Encode -->
+	<meta content="ja" http-equiv="Content-Language" />
+	<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+	<!-- Set Resolution -->
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<!-- full screen on iOS browser -->
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<!-- title -->
+	<title>AudioNode</title>
+	<!-- icon -->
+	<link rel="icon" href="../logo/audio_node_logo_small.ico" type="image/vnd.microsoft.icon">
+
+	<script type="application/javascript" src="../dst/app.js"></script>
+	<script type="application/javascript">
+		createAudioNodeCanvas(
+[
+  {
+    "unique_id": 0,
+    "type": "filter",
+    "name": "midi to sine",
+    "x": 298,
+    "y": 88.99999999999999,
+    "w": 140,
+    "h": 140.57282809406206,
+    "inputs": [
+      {
+        "srcNodeId": 3,
+        "srcParamName": "output frame",
+        "thisParamName": "input_frame"
+      }
+    ],
+    "custom": {
+      "frameBufferState": {
+        "width": 1024,
+        "height": 1,
+        "type": 5126
+      },
+      "compileState": {
+        "initialized": true,
+        "lastChangeTime": 1613929296223,
+        "isCompiled": true,
+        "code": "{\n    \"name\": \"midi to sine\",\n\t\"code\": \"\n\t\tprecision highp float;\n\t\tuniform sampler2D input_frame;\n\t\tuniform vec2 input_frame_area;\n\t\tvarying vec2 v_uv;\n\t\t\n\t\tvoid main(void){\n\t\t\tvec2 p = v_uv * input_frame_area;\n\t\t\tfloat wave = 0.0;\n\t\t\tfor(int i = 0; i < 128; i++) {\n\t\t\t\tvec4 key = texture2D(input_frame, vec2(float(i) / 127.0, 0.0));\n\t\t\t\tfloat hz = 440.0 * pow(2.0, (float(i) - 69.0) / 12.0);\n\t\t\t\tfloat len = 44100.0;\n\t\t\t\tfloat pi = 3.14159265;\n\t\t\t\tif (key.r != 0.0) wave += 0.3 * key.r * sin(hz * 2.0 * pi * 1024.0 * (key.g + p.x) / len);\n\t\t\t}\n\t\t\tgl_FragColor = vec4(wave - 0.0, 0.0, 0.0, 1.0);\n\t\t}\n\t\",\n\t\"output_width\": 1024,\n\t\"output_height\": 1,\n\t\"output_type\": \"FLOAT\",\n\t\"preview\": \"\n\t\tprecision highp float;\n\t\tuniform sampler2D output_frame;\n\t\tuniform vec2 output_frame_area;\n\t\tvarying vec2 v_uv;\n\t\t\n\t\tvoid main(void){\n\t\t\tvec2 p = v_uv * output_frame_area;\n\t\t\tfloat wave = texture2D(output_frame, p).r / 2.0;\n\t\t\tp.y = (p.y * 2.0) - 1.0;\n\t\t\tfloat g = (p.y > wave) ? 1.0 : 0.0;\n\t\t\tgl_FragColor = vec4(vec3(g), 1.0);\n\t\t}\n\t\"\n}",
+        "error": "",
+        "latency": 500
+      }
+    }
+  },
+  {
+    "unique_id": 1,
+    "type": "audio input frame",
+    "name": "audio input",
+    "x": 47,
+    "y": 721.9999999999999,
+    "w": 140,
+    "h": 140.57282809406206,
+    "custom": {
+      "frameBufferState": {
+        "width": 1024,
+        "height": 1,
+        "format": 6408,
+        "type": 5126
+      },
+      "array_length": 1024
+    },
+    "inputs": []
+  },
+  {
+    "unique_id": 2,
+    "type": "audio output frame",
+    "name": "audio output",
+    "x": 549.9245735466945,
+    "y": 36.94280378872752,
+    "w": 140,
+    "h": 140.57282809406206,
+    "inputs": [
+      {
+        "srcNodeId": 0,
+        "srcParamName": "output frame",
+        "thisParamName": "input frame"
+      }
+    ],
+    "custom": {}
+  },
+  {
+    "unique_id": 3,
+    "type": "midi input frame",
+    "name": "midi input",
+    "x": 37.00000000000001,
+    "y": 44.99999999999999,
+    "w": 140,
+    "h": 101.52245352843795,
+    "custom": {
+      "frameBufferState": {
+        "width": 128,
+        "height": 1,
+        "format": 6408,
+        "type": 5126
+      }
+    },
+    "inputs": []
+  },
+  {
+    "unique_id": 4,
+    "type": "create",
+    "name": "クリックで新しいノードを追加",
+    "x": 242,
+    "y": 760.0000000000001,
+    "w": 299.9151215102925,
+    "h": 99.95968271738896,
+    "inpus": [],
+    "custom": {},
+    "inputs": []
+  }
+]
+		);
+	</script>
+	
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159630441-1"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-159630441-1');
+	</script>
+</head>
+<body>
+</body>
+</html>
