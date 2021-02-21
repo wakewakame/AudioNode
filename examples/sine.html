@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Select Text Encode -->
+	<meta content="ja" http-equiv="Content-Language" />
+	<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+	<!-- Set Resolution -->
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<!-- full screen on iOS browser -->
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<!-- title -->
+	<title>AudioNode</title>
+	<!-- icon -->
+	<link rel="icon" href="../logo/audio_node_logo_small.ico" type="image/vnd.microsoft.icon">
+
+	<script type="application/javascript" src="../dst/app.js"></script>
+	<script type="application/javascript">
+		createAudioNodeCanvas(
+[
+  {
+    "unique_id": 0,
+    "type": "audio output frame",
+    "name": "audio output",
+    "x": 461.00000000000006,
+    "y": 30.000000000000004,
+    "w": 140,
+    "h": 140.8603020412938,
+    "inputs": [
+      {
+        "srcNodeId": 1,
+        "srcParamName": "output frame",
+        "thisParamName": "input frame"
+      }
+    ],
+    "custom": {}
+  },
+  {
+    "unique_id": 1,
+    "type": "filter",
+    "name": "sine wave",
+    "x": 199.99999999999997,
+    "y": 86.99999999999997,
+    "w": 140,
+    "h": 140.8603020412938,
+    "inputs": [
+      {
+        "srcNodeId": 2,
+        "srcParamName": "output frame number",
+        "thisParamName": "frame_number"
+      }
+    ],
+    "custom": {
+      "frameBufferState": {
+        "width": 1024,
+        "height": 1,
+        "type": 5126
+      },
+      "compileState": {
+        "initialized": true,
+        "lastChangeTime": 1613922259270,
+        "isCompiled": true,
+        "code": "{\n    \"name\": \"copy\",\n    \"output_width\": 1024,\n    \"output_height\": 1,\n    \"output_type\": \"FLOAT\",\n    \"code\": \"\n        precision highp float;\n        uniform int frame_number;\n        varying vec2 v_uv;\n        const float pi = 3.14159265358979;\n        const float rate = 44100.0;\n        const float len = 1024.0;\n\n        void main(void){\n            float hz = 440.0;\n            float index = v_uv.x + float(frame_number);\n            float wave = 0.2 * sin(hz * 2.0 * pi * index * len / rate);\n            gl_FragColor = vec4(wave - 0.0, 0.0, 0.0, 1.0);\n        }\n    \",\n    \"preview\": \"\n        precision highp float;\n        uniform sampler2D output_frame;\n        uniform vec2 output_frame_area;\n        varying vec2 v_uv;\n        \n        void main(void){\n            vec2 p = v_uv * output_frame_area;\n            float wave = texture2D(output_frame, p).r / 2.0;\n            p.y = (p.y * 2.0) - 1.0;\n            float g = (p.y > wave) ? 1.0 : 0.0;\n            gl_FragColor = vec4(vec3(g), 1.0);\n        }\n    \"\n}",
+        "error": "",
+        "latency": 500
+      }
+    }
+  },
+  {
+    "unique_id": 2,
+    "type": "time",
+    "name": "time",
+    "x": 30,
+    "y": 30,
+    "w": 40,
+    "h": 80,
+    "inputs": [],
+    "custom": {}
+  },
+  {
+    "unique_id": 3,
+    "type": "audio input frame",
+    "name": "audio input",
+    "x": 38.99999999999999,
+    "y": 692,
+    "w": 140,
+    "h": 140.8603020412938,
+    "custom": {
+      "frameBufferState": {
+        "width": 1024,
+        "height": 1,
+        "format": 6408,
+        "type": 5126
+      },
+      "array_length": 1024
+    },
+    "inputs": []
+  },
+  {
+    "unique_id": 4,
+    "type": "midi input frame",
+    "name": "midi input",
+    "x": 255,
+    "y": 729.0000000000002,
+    "w": 140,
+    "h": 102.29507922497932,
+    "custom": {
+      "frameBufferState": {
+        "width": 128,
+        "height": 1,
+        "format": 6408,
+        "type": 5126
+      }
+    },
+    "inputs": []
+  },
+  {
+    "unique_id": 5,
+    "type": "create",
+    "name": "クリックで新しいノードを追加",
+    "x": 472.99999999999994,
+    "y": 730.0000000000001,
+    "w": 299.87269915214614,
+    "h": 99.9395320972694,
+    "inpus": [],
+    "custom": {},
+    "inputs": []
+  }
+]
+		);
+	</script>
+	
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159630441-1"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-159630441-1');
+	</script>
+</head>
+<body>
+</body>
+</html>

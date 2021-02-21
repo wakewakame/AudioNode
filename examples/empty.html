@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Select Text Encode -->
+	<meta content="ja" http-equiv="Content-Language" />
+	<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+	<!-- Set Resolution -->
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<!-- full screen on iOS browser -->
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<!-- title -->
+	<title>AudioNode</title>
+	<!-- icon -->
+	<link rel="icon" href="../logo/audio_node_logo_small.ico" type="image/vnd.microsoft.icon">
+
+	<script type="application/javascript" src="../dst/app.js"></script>
+	<script type="application/javascript">
+		createAudioNodeCanvas(
+[
+  {
+    "unique_id": 0,
+    "type": "audio input frame",
+    "name": "audio input",
+    "x": 30,
+    "y": 30,
+    "w": 140,
+    "h": 140,
+    "custom": {
+      "frameBufferState": {
+        "width": 1024,
+        "height": 1,
+        "format": 6408,
+        "type": 5126
+      },
+      "array_length": 1024
+    },
+    "inputs": []
+  },
+  {
+    "unique_id": 1,
+    "type": "audio output frame",
+    "name": "audio output",
+    "x": 530,
+    "y": 30,
+    "w": 140,
+    "h": 140,
+    "inputs": [
+      {
+        "srcNodeId": null,
+        "srcParamName": null,
+        "thisParamName": "input frame"
+      }
+    ],
+    "custom": {}
+  },
+  {
+    "unique_id": 2,
+    "type": "midi input frame",
+    "name": "midi input",
+    "x": 30,
+    "y": 230,
+    "w": 140,
+    "h": 100,
+    "custom": {
+      "frameBufferState": {
+        "width": 128,
+        "height": 1,
+        "format": 6408,
+        "type": 5126
+      }
+    },
+    "inputs": []
+  },
+  {
+    "unique_id": 3,
+    "type": "create",
+    "name": "クリックで新しいノードを追加",
+    "x": 30,
+    "y": 390,
+    "w": 300,
+    "h": 100,
+    "inpus": [],
+    "custom": {},
+    "inputs": []
+  },
+]
+		);
+	</script>
+	
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159630441-1"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-159630441-1');
+	</script>
+</head>
+<body>
+</body>
+</html>

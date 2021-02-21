@@ -5,7 +5,7 @@ const FrameNode = HydrangeaJS.Extra.ShaderNode.FrameNode;
 const ValueNodeParam = HydrangeaJS.Extra.ShaderNode.ValueNodeParam;
 
 export const AudioBufferNode = class extends FrameNode {
-	constructor(name, url, x, y, audioBuffer) {
+	constructor(name = "", url = "", x = 0, y = 0) {
 		super();
 		this.type = "audio frame";
 		this.name = name;
@@ -14,15 +14,38 @@ export const AudioBufferNode = class extends FrameNode {
 		this.json["custom"].frameBufferState.width = 4096;
 		this.json["custom"].frameBufferState.height = 4096;
 		this.json["custom"].url = url;
-		this.audioBuffer = audioBuffer;
+		this.audioBuffer = null;
 		this.audioArray = new Float32Array(4096*4096*4);
-		for(let i = 0; i < this.audioBuffer.numberOfChannels; i++) {
-			this.audioArray.set(
-				this.audioBuffer.getChannelData(i),
-				i * this.audioBuffer.length
-			);
-		}
 		this.outputAudioLengthNodeParam = null;
+		this.loading = true;
+	}
+	update() {
+		super.update();
+		if (
+			(this.loading) &&
+			(this.parent) &&
+			(this.parent.audio) &&
+			(this.parent.audio.start)
+		) {
+			this.loading = false;
+			const url = this.json["custom"].url;
+			const audio = this.parent.audio;
+			audio.loadSound(url, e => {
+				this.audioBuffer = e;
+				for(let i = 0; i < this.audioBuffer.numberOfChannels; i++) {
+					this.audioArray.set(
+						this.audioBuffer.getChannelData(i),
+						i * this.audioBuffer.length
+					);
+				}
+				this.outputAudioLengthNodeParam.value.x = this.audioBuffer.length;
+				this.previewShader.set("audioLength", this.audioBuffer.length);
+				this.frameBuffer.texture.update(this.audioArray);
+			}, e => {
+				console.log(e);
+				this.parent.remove(this);
+			});
+		}
 	}
 	setup() {
 		super.setup();
@@ -33,7 +56,6 @@ export const AudioBufferNode = class extends FrameNode {
 		this.inputs.remove(this.inputShaderNodeParam);
 		this.inputs.remove(this.inputResolutionNodeParam);
 		this.outputAudioLengthNodeParam = this.outputs.add(new ValueNodeParam("int", "audio length"));
-		this.outputAudioLengthNodeParam.value.x = this.audioBuffer.length;
 		this.previewShader.loadShader(this.previewShader.default_shader.vertex, `
 precision highp float;
 uniform sampler2D texture;
@@ -66,10 +88,7 @@ void main(void){
 		`);
 		let tmp_current_shader = this.graphics.current_shader;
 		this.graphics.shader(this.previewShader);
-		this.previewShader.set("audioLength", this.audioBuffer.length);
 		this.graphics.shader(tmp_current_shader);
-
-		this.frameBuffer.texture.update(this.audioArray);
 	}
 };
 export const AudioInputNode = class extends FrameNode {

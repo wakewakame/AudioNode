@@ -34,7 +34,8 @@ const NodeCanvasExt = class extends ConvertibleNodeCanvas{
 			"ivec3": ValueNode,
 			"vec3": ValueNode,
 			"ivec4": ValueNode,
-			"vec4": ValueNode
+			"vec4": ValueNode,
+			"audio frame": AudioBufferNode
 		});
 		this.page = page;
 		this.activeNode = null;
@@ -132,76 +133,13 @@ const NodeCanvasExt = class extends ConvertibleNodeCanvas{
 };
 
 const OriginalPageEvent = class extends PageEvent {
-	constructor() {
+	constructor(json = []) {
 		super();
 		this.nodeCanvas = null;
+		this.json = json;
 	}
 	init(page) {
-		const json = 
-[
-	{
-		"unique_id":0,
-		"type":"audio input frame",
-		"name":"audio input",
-		"x":30,
-		"y":30,
-		"w":140,
-		"h":140,
-		"custom":{
-			"frameBufferState":{
-				"width":1024,
-				"height":1,
-				"format":6408,
-				"type":5126
-			},
-			"array_length":1024
-		},
-		"inputs":[]
-	},
-	{
-		"unique_id":1,
-		"type":"audio output frame",
-		"name":"audio output",
-		"x":530,
-		"y":30,
-		"w":140,
-		"h":140,
-		"inputs":[],
-		"custom":{},
-	},
-	{
-		"unique_id":2,
-		"type":"midi input frame",
-		"name":"midi input",
-		"x":30,
-		"y":230,
-		"w":140,
-		"h":100,
-		"custom":{
-			"frameBufferState":{
-				"width":128,
-				"height":1,
-				"format":6408,
-				"type":5126
-			}
-		},
-		"inputs":[]
-	},
-	{
-		"unique_id":3,
-		"type":"create",
-		"name":"クリックで新しいノードを追加",
-		"x":30,
-		"y":390,
-		"w":280,
-		"h":100,
-		"inpus":[],
-		"custom":{},
-		"inputs":[]
-	}
-];
-
-		this.nodeCanvas = page.addComponent(new NodeCanvasExt(page, json));
+		this.nodeCanvas = page.addComponent(new NodeCanvasExt(page, this.json));
 
 		console.log(JSON.stringify(this.nodeCanvas.save()));
 	}
@@ -214,13 +152,14 @@ const OriginalPageEvent = class extends PageEvent {
 		for(let i = 0; i < files.length; i++) {
 			const url = URL.createObjectURL(files[i]);
 			const name = files[i].name;
-			this.nodeCanvas.audio.loadSound(url, (e) => {
-				this.nodeCanvas.add(new AudioBufferNode(name, url, 30, 30, e));
-			}, () => {
-				this.nodeCanvas.add(new PictureNode(name, url, 30, 30));
-			});
+			this.nodeCanvas.add(new AudioBufferNode(name, url, 30, 30));
+			this.nodeCanvas.add(new PictureNode(name, url, 30, 30));
 		}
 	}
 };
 
-const page = new Page(new OriginalPageEvent());
+export const createAudioNodeCanvas = (json) => {
+	new Page(new OriginalPageEvent(json));
+};
+
+window.createAudioNodeCanvas = createAudioNodeCanvas;
